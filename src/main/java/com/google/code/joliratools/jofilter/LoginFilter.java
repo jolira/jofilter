@@ -33,6 +33,8 @@ public class LoginFilter implements Filter {
     private String username;
     private String password;
 
+    static final String LOGIN_SERVLET = "___jo__security__check___";
+
     private void checkPassword(final HttpServletRequest req,
             final HttpServletResponse resp) throws IOException {
         final String url = req.getParameter("url");
@@ -178,7 +180,9 @@ public class LoginFilter implements Filter {
             out.print("<i>invalid username and/or password</i><br>");
         }
 
-        out.print("<form method=\"POST\" action=\"jo_security_check\">");
+        out.print("<form method=\"POST\" action=\"");
+        out.print(LOGIN_SERVLET);
+        out.print("\">");
         out.print("Username: <input type=\"text\" name=\"username\"><br>");
         out.print("Password: <input type=\"password\" name=\"password\"><br>");
         out.print("<input type=\"hidden\" name=\"url\" value=\"");

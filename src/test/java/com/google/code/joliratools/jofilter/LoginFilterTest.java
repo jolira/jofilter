@@ -1,5 +1,6 @@
 package com.google.code.joliratools.jofilter;
 
+import static java.net.URLEncoder.encode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -592,9 +593,19 @@ public class LoginFilterTest {
         }
     }
 
-    private static final String REMOTE_ADDRESS = "theRemoteAddress";
-
     private static final String TEST_URL = "http://jolira.com/myinfo/test?a=b";
+
+    private static final String LOGIN_HTML = "<html><head><title>Please Log "
+            + "in!</title></head><body><form method=\"POST\" " + "action=\""
+            + LoginFilter.LOGIN_SERVLET
+            + "\">Username: <input type=\"text\" name=\"username\"><br>"
+            + "Password: <input type=\"password\" name=\"password\"><br>"
+            + "<input type=\"hidden\" name=\"url\" " + "value=\""
+            + urlEncode(TEST_URL) + "\">"
+            + "<input type=\"submit\" value=\"Log In\"><br></input></form>"
+            + "</body></html>";
+
+    private static final String REMOTE_ADDRESS = "theRemoteAddress";
 
     public static void main(final String[] args)
             throws NoSuchAlgorithmException, IOException {
@@ -614,6 +625,14 @@ public class LoginFilterTest {
             oout.writeObject(key);
         } finally {
             oout.close();
+        }
+    }
+
+    private static String urlEncode(final String value) {
+        try {
+            return encode(TEST_URL, "UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            throw new Error(e);
         }
     }
 
@@ -647,9 +666,7 @@ public class LoginFilterTest {
 
         final String result = out.toString();
 
-        assertEquals(
-                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
-                result);
+        assertEquals(LOGIN_HTML, result);
     }
 
     @Test
@@ -682,9 +699,7 @@ public class LoginFilterTest {
 
         final String result = out.toString();
 
-        assertEquals(
-                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
-                result);
+        assertEquals(LOGIN_HTML, result);
     }
 
     @Test
