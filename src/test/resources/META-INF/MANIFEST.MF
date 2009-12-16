@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: jfk
+Build-Jdk: 1.6.0_0
+Implemenation-Name: com.wm.mobile.web
+Implemenation-Title: Mobile Web
+Implemenation-Version: 1.0-SNAPSHOT
+build: jfk-build-tag
+
