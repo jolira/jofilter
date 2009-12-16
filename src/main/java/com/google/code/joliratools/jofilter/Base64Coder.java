@@ -208,8 +208,8 @@ class Base64Coder {
         return new String(encode(s.getBytes()));
     }
 
-    // Dummy constructor.
     private Base64Coder() {
+        // Dummy constructor.
     }
 
 } // end class Base64Coder
