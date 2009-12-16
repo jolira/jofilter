@@ -21,10 +21,6 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.Cookie;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
-@SuppressWarnings("restriction")
 class LoginCookieContent implements Serializable {
     private static final String ALGORITHM = "Blowfish";
     private static final long serialVersionUID = 7579773293494069499L;
@@ -50,12 +46,11 @@ class LoginCookieContent implements Serializable {
             throws IOException, ClassNotFoundException,
             NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidKeyException {
-        final BASE64Decoder decoder = new BASE64Decoder();
         final Cipher chipher = Cipher.getInstance(ALGORITHM);
 
         chipher.init(DECRYPT_MODE, key);
 
-        final byte[] decoded = decoder.decodeBuffer(value);
+        final byte[] decoded = Base64Coder.decode(value);
         final InputStream in = new ByteArrayInputStream(decoded);
         final InputStream cin = new CipherInputStream(in, chipher);
         final ObjectInputStream oin = new ObjectInputStream(cin);
@@ -165,7 +160,9 @@ class LoginCookieContent implements Serializable {
             throw new Error(e);
         }
 
-        return new Cookie(ACCESS_COOKIE_NAME, val);
+        final Cookie cookie = new Cookie(ACCESS_COOKIE_NAME, val);
+
+        return cookie;
     }
 
     private String write() throws IOException, NoSuchAlgorithmException,
@@ -174,7 +171,6 @@ class LoginCookieContent implements Serializable {
 
         cipher.init(ENCRYPT_MODE, key);
 
-        final BASE64Encoder encoder = new BASE64Encoder();
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final OutputStream cout = new CipherOutputStream(out, cipher);
         final ObjectOutputStream oout = new ObjectOutputStream(cout);
@@ -186,7 +182,8 @@ class LoginCookieContent implements Serializable {
         }
 
         final byte[] _val = out.toByteArray();
+        final char[] encoded = Base64Coder.encode(_val);
 
-        return encoder.encode(_val);
+        return new String(encoded);
     }
 }

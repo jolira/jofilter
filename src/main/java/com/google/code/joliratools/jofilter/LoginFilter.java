@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.Key;
 
 import javax.servlet.Filter;
@@ -28,6 +30,33 @@ public class LoginFilter implements Filter {
     }
 
     private Key key;
+    private String username;
+    private String password;
+
+    private void checkPassword(final HttpServletRequest req,
+            final HttpServletResponse resp) throws IOException {
+        final String url = req.getParameter("url");
+
+        if (!isValidUsernamePassword(req)) {
+            respondWithLoginPage(url, resp, true);
+            return;
+        }
+
+        final String remoteAddr = req.getRemoteAddr();
+        final LoginCookieContent content = new LoginCookieContent(remoteAddr,
+                key);
+        final Cookie cookie = content.toCookie();
+
+        resp.addCookie(cookie);
+
+        if (url == null) {
+            throw new Error("unable to complete");
+        }
+
+        final String decodedUrl = URLDecoder.decode(url, "UTF-8");
+
+        resp.sendRedirect(decodedUrl);
+    }
 
     @Override
     public void destroy() {
@@ -46,8 +75,14 @@ public class LoginFilter implements Filter {
         }
 
         final CharSequence requestURL = _req.getRequestURL();
+        final String servletPath = _req.getServletPath();
 
-        respondWithLoginPage(requestURL, _resp);
+        if (servletPath != null && servletPath.endsWith("/jo_security_check")) {
+            checkPassword(_req, _resp);
+            return;
+        }
+
+        respondWithLoginPage(requestURL, _resp, false);
     }
 
     private Cookie findAccessCookie(final HttpServletRequest req) {
@@ -91,6 +126,30 @@ public class LoginFilter implements Filter {
         } catch (final ClassNotFoundException e) {
             throw new Error(e);
         }
+
+        username = config.getInitParameter("username");
+
+        if (username == null) {
+            throw new IllegalArgumentException("please specify a username");
+        }
+
+        password = config.getInitParameter("password");
+
+        if (password == null) {
+            throw new IllegalArgumentException("please specify a password");
+        }
+    }
+
+    private boolean isValidUsernamePassword(final HttpServletRequest req) {
+        final String _username = req.getParameter("username");
+
+        if (!username.equals(_username)) {
+            return false;
+        }
+
+        final String _password = req.getParameter("password");
+
+        return password.equals(_password);
     }
 
     private Key readKey(final InputStream in) throws IOException,
@@ -105,22 +164,30 @@ public class LoginFilter implements Filter {
     }
 
     private void respondWithLoginPage(final CharSequence requestURL,
-            final HttpServletResponse resp) throws IOException {
+            final HttpServletResponse resp, final boolean previouslyFailed)
+            throws IOException {
         final ServletOutputStream out = resp.getOutputStream();
 
-        out.println("<html>");
-        out.println("<head>");
-        out.println("<title>Please Log in!</title>");
-        out.println("</head>");
-        out.println("<body>");
-        out.println("<form method=\"POST\" action=\"jo_security_check\">");
-        out.println("Username: <input type=\"text\" name=\"username\"><br>");
-        out.println("Password: <input type=\"password\" name=\"password\">");
-        out.println("<input type=\"hidden\" name=\"url\">" + requestURL
-                + "</input>");
-        out.println("</form>");
-        out.println("</body>");
-        out.println("</html>");
-    }
+        out.print("<html>");
+        out.print("<head>");
+        out.print("<title>Please Log in!</title>");
+        out.print("</head>");
+        out.print("<body>");
 
+        if (previouslyFailed) {
+            out.print("<i>invalid username and/or password</i><br>");
+        }
+
+        out.print("<form method=\"POST\" action=\"jo_security_check\">");
+        out.print("Username: <input type=\"text\" name=\"username\"><br>");
+        out.print("Password: <input type=\"password\" name=\"password\"><br>");
+        out.print("<input type=\"hidden\" name=\"url\" value=\"");
+        out.print(URLEncoder.encode(requestURL.toString(), "UTF-8"));
+        out.print("<\">");
+        out.print("<input type=\"submit\" value=\"Log In\"><br>");
+        out.print("</input>");
+        out.print("</form>");
+        out.print("</body>");
+        out.print("</html>");
+    }
 }

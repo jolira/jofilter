@@ -9,9 +9,14 @@
     <filter-name>LoginFilter</filter-name>
     <filter-class>com.google.code.joliratools.jofilter.LoginFilter</filter-class>
     <init-param>
-      <description>Not yet known</description>
-      <param-name>dummy</param-name>
-      <param-value>dummy</param-value>
+      <description>Username to check for</description>
+      <param-name>username</param-name>
+      <param-value>jolira</param-value>
+    </init-param>
+    <init-param>
+      <description>Password to check for</description>
+      <param-name>password</param-name>
+      <param-value>karen</param-value>
     </init-param>
   </filter>
   <filter-mapping>

@@ -45,6 +45,14 @@ public class LoginFilterTest {
 
         @Override
         public String getInitParameter(final String name) {
+            if ("username".equals(name)) {
+                return "jolira";
+            }
+
+            if ("password".equals(name)) {
+                return "karen";
+            }
+
             return null;
         }
 
@@ -302,12 +310,6 @@ public class LoginFilterTest {
         public int getServerPort() {
             fail();
             return 0;
-        }
-
-        @Override
-        public String getServletPath() {
-            fail();
-            return null;
         }
 
         @Override
@@ -626,6 +628,11 @@ public class LoginFilterTest {
             public Cookie[] getCookies() {
                 return new Cookie[] {};
             }
+
+            @Override
+            public String getServletPath() {
+                return "/xxx/xxx";
+            }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
         }, new FilterChain() {
@@ -641,16 +648,7 @@ public class LoginFilterTest {
         final String result = out.toString();
 
         assertEquals(
-                "<html>\r\n"
-                        + "<head>\r\n"
-                        + "<title>Please Log in!</title>\r\n"
-                        + "</head>\r\n"
-                        + "<body>\r\n"
-                        + "<form method=\"POST\" action=\"jo_security_check\">\r\n"
-                        + "Username: <input type=\"text\" name=\"username\"><br>\r\n"
-                        + "Password: <input type=\"password\" name=\"password\">\r\n"
-                        + "<input type=\"hidden\" name=\"url\">http://jolira.com/myinfo/test?a=b</input>\r\n"
-                        + "</form>\r\n" + "</body>\r\n" + "</html>\r\n" + "",
+                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db<\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
                 result);
     }
 
@@ -665,6 +663,11 @@ public class LoginFilterTest {
             public Cookie[] getCookies() {
                 return null;
             }
+
+            @Override
+            public String getServletPath() {
+                return "/xx/xxx";
+            }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
         }, new FilterChain() {
@@ -680,16 +683,7 @@ public class LoginFilterTest {
         final String result = out.toString();
 
         assertEquals(
-                "<html>\r\n"
-                        + "<head>\r\n"
-                        + "<title>Please Log in!</title>\r\n"
-                        + "</head>\r\n"
-                        + "<body>\r\n"
-                        + "<form method=\"POST\" action=\"jo_security_check\">\r\n"
-                        + "Username: <input type=\"text\" name=\"username\"><br>\r\n"
-                        + "Password: <input type=\"password\" name=\"password\">\r\n"
-                        + "<input type=\"hidden\" name=\"url\">http://jolira.com/myinfo/test?a=b</input>\r\n"
-                        + "</form>\r\n" + "</body>\r\n" + "</html>\r\n" + "",
+                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db<\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
                 result);
     }
 
@@ -708,6 +702,11 @@ public class LoginFilterTest {
             @Override
             public Cookie[] getCookies() {
                 return new Cookie[] { cookie };
+            }
+
+            @Override
+            public String getServletPath() {
+                return "xx/xxx/xxx";
             }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
