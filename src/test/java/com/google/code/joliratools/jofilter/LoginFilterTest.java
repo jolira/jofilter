@@ -1,5 +1,6 @@
 package com.google.code.joliratools.jofilter;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
@@ -61,8 +62,6 @@ public class LoginFilterTest {
     }
 
     static abstract class MockHttpServletRequest implements HttpServletRequest {
-        private static final String TEST_URL = "http://jolira.com/myinfo/test?a=b";
-
         @Override
         public Object getAttribute(final String name) {
             fail();
@@ -239,7 +238,7 @@ public class LoginFilterTest {
 
         @Override
         public String getRemoteAddr() {
-            return "theRemoteAddress";
+            return REMOTE_ADDRESS;
         }
 
         @Override
@@ -387,6 +386,12 @@ public class LoginFilterTest {
 
     static abstract class MockHttpServletResponse implements
             HttpServletResponse {
+        final StringBuilder out;
+
+        MockHttpServletResponse(final StringBuilder out) {
+            this.out = out;
+        }
+
         @Override
         public void addCookie(final Cookie cookie) {
             fail();
@@ -473,8 +478,12 @@ public class LoginFilterTest {
 
         @Override
         public ServletOutputStream getOutputStream() throws IOException {
-            fail();
-            return null;
+            return new ServletOutputStream() {
+                @Override
+                public void write(final int b) throws IOException {
+                    out.append((char) b);
+                }
+            };
         }
 
         @Override
@@ -581,6 +590,10 @@ public class LoginFilterTest {
         }
     }
 
+    private static final String REMOTE_ADDRESS = "theRemoteAddress";
+
+    private static final String TEST_URL = "http://jolira.com/myinfo/test?a=b";
+
     public static void main(final String[] args)
             throws NoSuchAlgorithmException, IOException {
         if (args.length < 1) {
@@ -605,6 +618,7 @@ public class LoginFilterTest {
     @Test
     public void testNoCookies() throws ServletException, IOException {
         final Filter filter = new LoginFilter();
+        final StringBuilder out = new StringBuilder();
 
         filter.init(new MockFilterConfig());
         filter.doFilter(new MockHttpServletRequest() {
@@ -612,7 +626,7 @@ public class LoginFilterTest {
             public Cookie[] getCookies() {
                 return new Cookie[] {};
             }
-        }, new MockHttpServletResponse() {
+        }, new MockHttpServletResponse(out) {
             // nothing in this test
         }, new FilterChain() {
             @Override
@@ -623,11 +637,27 @@ public class LoginFilterTest {
             }
         });
         filter.destroy();
+
+        final String result = out.toString();
+
+        assertEquals(
+                "<html>\r\n"
+                        + "<head>\r\n"
+                        + "<title>Please Log in!</title>\r\n"
+                        + "</head>\r\n"
+                        + "<body>\r\n"
+                        + "<form method=\"POST\" action=\"jo_security_check\">\r\n"
+                        + "Username: <input type=\"text\" name=\"username\"><br>\r\n"
+                        + "Password: <input type=\"password\" name=\"password\">\r\n"
+                        + "<input type=\"hidden\" name=\"url\">http://jolira.com/myinfo/test?a=b</input>\r\n"
+                        + "</form>\r\n" + "</body>\r\n" + "</html>\r\n" + "",
+                result);
     }
 
     @Test
     public void testNullCookies() throws ServletException, IOException {
         final Filter filter = new LoginFilter();
+        final StringBuilder out = new StringBuilder();
 
         filter.init(new MockFilterConfig());
         filter.doFilter(new MockHttpServletRequest() {
@@ -635,7 +665,7 @@ public class LoginFilterTest {
             public Cookie[] getCookies() {
                 return null;
             }
-        }, new MockHttpServletResponse() {
+        }, new MockHttpServletResponse(out) {
             // nothing in this test
         }, new FilterChain() {
             @Override
@@ -646,6 +676,21 @@ public class LoginFilterTest {
             }
         });
         filter.destroy();
+
+        final String result = out.toString();
+
+        assertEquals(
+                "<html>\r\n"
+                        + "<head>\r\n"
+                        + "<title>Please Log in!</title>\r\n"
+                        + "</head>\r\n"
+                        + "<body>\r\n"
+                        + "<form method=\"POST\" action=\"jo_security_check\">\r\n"
+                        + "Username: <input type=\"text\" name=\"username\"><br>\r\n"
+                        + "Password: <input type=\"password\" name=\"password\">\r\n"
+                        + "<input type=\"hidden\" name=\"url\">http://jolira.com/myinfo/test?a=b</input>\r\n"
+                        + "</form>\r\n" + "</body>\r\n" + "</html>\r\n" + "",
+                result);
     }
 
     @Test
@@ -653,8 +698,10 @@ public class LoginFilterTest {
             ClassNotFoundException {
         final Filter filter = new LoginFilter();
         final Key key = LoginCookieContentTest.readKey();
-        final LoginCookieContent content = new LoginCookieContent("xxxx", key);
+        final LoginCookieContent content = new LoginCookieContent(
+                REMOTE_ADDRESS, key);
         final Cookie cookie = content.toCookie();
+        final StringBuilder out = new StringBuilder();
 
         filter.init(new MockFilterConfig());
         filter.doFilter(new MockHttpServletRequest() {
@@ -662,16 +709,22 @@ public class LoginFilterTest {
             public Cookie[] getCookies() {
                 return new Cookie[] { cookie };
             }
-        }, new MockHttpServletResponse() {
+        }, new MockHttpServletResponse(out) {
             // nothing in this test
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request,
                     final ServletResponse response) throws IOException,
                     ServletException {
-                fail();
+                final ServletOutputStream _out = response.getOutputStream();
+
+                _out.print("success");
             }
         });
         filter.destroy();
+
+        final String result = out.toString();
+
+        assertEquals("success", result);
     }
 }

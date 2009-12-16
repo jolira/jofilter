@@ -12,6 +12,7 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
@@ -39,12 +40,14 @@ public class LoginFilter implements Filter {
         final HttpServletRequest _req = (HttpServletRequest) req;
         final HttpServletResponse _resp = (HttpServletResponse) resp;
 
-        if (!hasValidCookie(_req)) {
-            final CharSequence requestURL = _req.getRequestURL();
-
-            respondWithLoginPage(requestURL, _resp);
+        if (hasValidCookie(_req)) {
+            chain.doFilter(req, resp);
             return;
         }
+
+        final CharSequence requestURL = _req.getRequestURL();
+
+        respondWithLoginPage(requestURL, _resp);
     }
 
     private Cookie findAccessCookie(final HttpServletRequest req) {
@@ -102,9 +105,22 @@ public class LoginFilter implements Filter {
     }
 
     private void respondWithLoginPage(final CharSequence requestURL,
-            final HttpServletResponse resp) {
-        // TODO Auto-generated method stub
+            final HttpServletResponse resp) throws IOException {
+        final ServletOutputStream out = resp.getOutputStream();
 
+        out.println("<html>");
+        out.println("<head>");
+        out.println("<title>Please Log in!</title>");
+        out.println("</head>");
+        out.println("<body>");
+        out.println("<form method=\"POST\" action=\"jo_security_check\">");
+        out.println("Username: <input type=\"text\" name=\"username\"><br>");
+        out.println("Password: <input type=\"password\" name=\"password\">");
+        out.println("<input type=\"hidden\" name=\"url\">" + requestURL
+                + "</input>");
+        out.println("</form>");
+        out.println("</body>");
+        out.println("</html>");
     }
 
 }
