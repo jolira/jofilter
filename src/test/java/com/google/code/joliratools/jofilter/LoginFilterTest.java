@@ -648,7 +648,7 @@ public class LoginFilterTest {
         final String result = out.toString();
 
         assertEquals(
-                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db<\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
+                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
                 result);
     }
 
@@ -683,7 +683,7 @@ public class LoginFilterTest {
         final String result = out.toString();
 
         assertEquals(
-                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db<\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
+                "<html><head><title>Please Log in!</title></head><body><form method=\"POST\" action=\"jo_security_check\">Username: <input type=\"text\" name=\"username\"><br>Password: <input type=\"password\" name=\"password\"><br><input type=\"hidden\" name=\"url\" value=\"http%3A%2F%2Fjolira.com%2Fmyinfo%2Ftest%3Fa%3Db\"><input type=\"submit\" value=\"Log In\"><br></input></form></body></html>",
                 result);
     }
 

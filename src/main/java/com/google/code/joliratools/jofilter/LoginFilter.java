@@ -183,7 +183,7 @@ public class LoginFilter implements Filter {
         out.print("Password: <input type=\"password\" name=\"password\"><br>");
         out.print("<input type=\"hidden\" name=\"url\" value=\"");
         out.print(URLEncoder.encode(requestURL.toString(), "UTF-8"));
-        out.print("<\">");
+        out.print("\">");
         out.print("<input type=\"submit\" value=\"Log In\"><br>");
         out.print("</input>");
         out.print("</form>");
