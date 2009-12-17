@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.Key;
 
 import javax.servlet.Filter;
@@ -34,6 +32,8 @@ public class LoginFilter implements Filter {
     private String password;
 
     static final String LOGIN_SERVLET = "___jo__security__check___";
+    static final String USERNAME = "username";
+    static final String PASSWORD = "password";
 
     private void checkPassword(final HttpServletRequest req,
             final HttpServletResponse resp) throws IOException {
@@ -55,9 +55,7 @@ public class LoginFilter implements Filter {
             throw new Error("unable to complete");
         }
 
-        final String decodedUrl = URLDecoder.decode(url, "UTF-8");
-
-        resp.sendRedirect(decodedUrl);
+        resp.sendRedirect(url);
     }
 
     @Override
@@ -79,7 +77,7 @@ public class LoginFilter implements Filter {
         final CharSequence requestURL = _req.getRequestURL();
         final String servletPath = _req.getServletPath();
 
-        if (servletPath != null && servletPath.endsWith("/jo_security_check")) {
+        if (servletPath != null && servletPath.endsWith("/" + LOGIN_SERVLET)) {
             checkPassword(_req, _resp);
             return;
         }
@@ -129,27 +127,27 @@ public class LoginFilter implements Filter {
             throw new Error(e);
         }
 
-        username = config.getInitParameter("username");
+        username = config.getInitParameter(USERNAME);
 
         if (username == null) {
-            throw new IllegalArgumentException("please specify a username");
+            throw new IllegalArgumentException("please specify a " + USERNAME);
         }
 
-        password = config.getInitParameter("password");
+        password = config.getInitParameter(PASSWORD);
 
         if (password == null) {
-            throw new IllegalArgumentException("please specify a password");
+            throw new IllegalArgumentException("please specify a " + PASSWORD);
         }
     }
 
     private boolean isValidUsernamePassword(final HttpServletRequest req) {
-        final String _username = req.getParameter("username");
+        final String _username = req.getParameter(USERNAME);
 
         if (!username.equals(_username)) {
             return false;
         }
 
-        final String _password = req.getParameter("password");
+        final String _password = req.getParameter(PASSWORD);
 
         return password.equals(_password);
     }
@@ -183,10 +181,12 @@ public class LoginFilter implements Filter {
         out.print("<form method=\"POST\" action=\"");
         out.print(LOGIN_SERVLET);
         out.print("\">");
-        out.print("Username: <input type=\"text\" name=\"username\"><br>");
-        out.print("Password: <input type=\"password\" name=\"password\"><br>");
+        out.print("Username: <input type=\"text\" name=\"" + USERNAME
+                + "\"><br>");
+        out.print("Password: <input type=\"password\" name=\"" + PASSWORD
+                + "\"><br>");
         out.print("<input type=\"hidden\" name=\"url\" value=\"");
-        out.print(URLEncoder.encode(requestURL.toString(), "UTF-8"));
+        out.print(requestURL.toString());
         out.print("\">");
         out.print("<input type=\"submit\" value=\"Log In\"><br>");
         out.print("</input>");

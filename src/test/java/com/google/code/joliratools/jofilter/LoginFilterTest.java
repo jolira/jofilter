@@ -5,15 +5,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.security.CodeSource;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
+import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -37,7 +41,7 @@ import javax.servlet.http.HttpSession;
 import org.junit.Test;
 
 public class LoginFilterTest {
-    static final class MockFilterConfig implements FilterConfig {
+    static class MockFilterConfig implements FilterConfig {
         @Override
         public String getFilterName() {
             fail();
@@ -598,8 +602,10 @@ public class LoginFilterTest {
     private static final String LOGIN_HTML = "<html><head><title>Please Log "
             + "in!</title></head><body><form method=\"POST\" " + "action=\""
             + LoginFilter.LOGIN_SERVLET
-            + "\">Username: <input type=\"text\" name=\"username\"><br>"
-            + "Password: <input type=\"password\" name=\"password\"><br>"
+            + "\">Username: <input type=\"text\" name=\""
+            + LoginFilter.USERNAME + "\"><br>"
+            + "Password: <input type=\"password\" name=\""
+            + LoginFilter.PASSWORD + "\"><br>"
             + "<input type=\"hidden\" name=\"url\" " + "value=\""
             + urlEncode(TEST_URL) + "\">"
             + "<input type=\"submit\" value=\"Log In\"><br></input></form>"
@@ -637,6 +643,35 @@ public class LoginFilterTest {
     }
 
     @Test
+    public void testKeyFileInConfig() throws ServletException {
+        final Filter filter = new LoginFilter();
+
+        filter.init(new MockFilterConfig() {
+            @Override
+            public String getInitParameter(final String name) {
+                if (!"keyFile".equals(name)) {
+                    return super.getInitParameter(name);
+                }
+
+                final ProtectionDomain pd = LoginFilter.class
+                        .getProtectionDomain();
+                final CodeSource cs = pd.getCodeSource();
+                final URL loc = cs.getLocation();
+                final String file = loc.getFile();
+                final File _file = new File(file);
+                final File directory = _file.getParentFile();
+                final Package pkg = LoginFilter.class.getPackage();
+                final String _pkgName = pkg.getName();
+                final String pkgName = _pkgName.replace('.', '/');
+                final File keyFile = new File(directory, "classes/" + pkgName
+                        + "/filter.key");
+
+                return keyFile.getAbsolutePath();
+            }
+        });
+    }
+
+    @Test
     public void testNoCookies() throws ServletException, IOException {
         final Filter filter = new LoginFilter();
         final StringBuilder out = new StringBuilder();
@@ -667,6 +702,34 @@ public class LoginFilterTest {
         final String result = out.toString();
 
         assertEquals(LOGIN_HTML, result);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNoPasswordInConfig() throws ServletException {
+        final Filter filter = new LoginFilter();
+
+        filter.init(new MockFilterConfig() {
+            @Override
+            public String getInitParameter(final String name) {
+                if (!"password".equals(name)) {
+                    return super.getInitParameter(name);
+                }
+
+                return null;
+            }
+        });
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNoUsernameInConfig() throws ServletException {
+        final Filter filter = new LoginFilter();
+
+        filter.init(new MockFilterConfig() {
+            @Override
+            public String getInitParameter(final String name) {
+                return null;
+            }
+        });
     }
 
     @Test
@@ -704,6 +767,46 @@ public class LoginFilterTest {
 
     @Test
     public void testValidCookie() throws ServletException, IOException,
+            ClassNotFoundException {
+        final Filter filter = new LoginFilter();
+        final Key key = LoginCookieContentTest.readKey();
+        final LoginCookieContent content = new LoginCookieContent(
+                REMOTE_ADDRESS, key);
+        final Cookie cookie = content.toCookie();
+        final StringBuilder out = new StringBuilder();
+
+        filter.init(new MockFilterConfig());
+        filter.doFilter(new MockHttpServletRequest() {
+            @Override
+            public Cookie[] getCookies() {
+                return new Cookie[] { cookie };
+            }
+
+            @Override
+            public String getServletPath() {
+                return "xx/xxx/xxx";
+            }
+        }, new MockHttpServletResponse(out) {
+            // nothing in this test
+        }, new FilterChain() {
+            @Override
+            public void doFilter(final ServletRequest request,
+                    final ServletResponse response) throws IOException,
+                    ServletException {
+                final ServletOutputStream _out = response.getOutputStream();
+
+                _out.print("success");
+            }
+        });
+        filter.destroy();
+
+        final String result = out.toString();
+
+        assertEquals("success", result);
+    }
+
+    @Test
+    public void testValidLogin() throws ServletException, IOException,
             ClassNotFoundException {
         final Filter filter = new LoginFilter();
         final Key key = LoginCookieContentTest.readKey();
