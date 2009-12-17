@@ -38,29 +38,6 @@ public class LoginFilter implements Filter {
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
 
-    private void checkPassword(final HttpServletRequest req,
-            final HttpServletResponse resp) throws IOException {
-        final String url = req.getParameter("url");
-
-        if (!isValidUsernamePassword(req)) {
-            respondWithLoginPage(url, resp, true);
-            return;
-        }
-
-        final String remoteAddr = req.getRemoteAddr();
-        final LoginCookieContent content = new LoginCookieContent(remoteAddr,
-                key, domain, expiry, path);
-        final Cookie cookie = content.toCookie();
-
-        resp.addCookie(cookie);
-
-        if (url == null) {
-            throw new Error("unable to complete");
-        }
-
-        resp.sendRedirect(url);
-    }
-
     @Override
     public void destroy() {
         // nothing yet
@@ -71,21 +48,43 @@ public class LoginFilter implements Filter {
             final FilterChain chain) throws IOException, ServletException {
         final HttpServletRequest _req = (HttpServletRequest) req;
         final HttpServletResponse _resp = (HttpServletResponse) resp;
+        String url = null;
 
-        if (hasValidCookie(_req)) {
+        if (!hasValidCookie(_req)) {
+            final String servletPath = _req.getServletPath();
+
+            if (servletPath == null
+                    || !servletPath.endsWith("/" + LOGIN_SERVLET)) {
+                final CharSequence requestURL = _req.getRequestURL();
+
+                respondWithLoginPage(requestURL, _resp, false);
+                return;
+            }
+
+            url = req.getParameter("url");
+
+            if (url == null) {
+                throw new Error("unable to complete");
+            }
+
+            if (!isValidUsernamePassword(_req)) {
+                respondWithLoginPage(url, _resp, true);
+                return;
+            }
+        }
+
+        final String remoteAddr = req.getRemoteAddr();
+        final LoginCookieContent content = new LoginCookieContent(remoteAddr,
+                key, domain, expiry, path);
+        final Cookie cookie = content.toCookie();
+
+        _resp.addCookie(cookie);
+
+        if (url != null) {
+            _resp.sendRedirect(url);
+        } else {
             chain.doFilter(req, resp);
-            return;
         }
-
-        final CharSequence requestURL = _req.getRequestURL();
-        final String servletPath = _req.getServletPath();
-
-        if (servletPath != null && servletPath.endsWith("/" + LOGIN_SERVLET)) {
-            checkPassword(_req, _resp);
-            return;
-        }
-
-        respondWithLoginPage(requestURL, _resp, false);
     }
 
     private Cookie findAccessCookie(final HttpServletRequest req) {
