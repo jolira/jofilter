@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.security.Key;
 
 import javax.servlet.Filter;
@@ -20,13 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class LoginFilter implements Filter {
-    static final class CookieContent implements Serializable {
-        private static final long serialVersionUID = -6069239866160436387L;
-
-        String requestedURL;
-        String remoteAddr;
-    }
-
     private Key key;
     private String username;
     private String password;
