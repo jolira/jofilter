@@ -81,6 +81,7 @@ class LoginCookieContent implements Serializable {
     }
 
     private final String remoteAddress;
+    private final long expires;
     private transient final Key key;
     private transient final String domain;
     private transient final int expiry;
@@ -91,6 +92,16 @@ class LoginCookieContent implements Serializable {
         this.domain = domain;
         this.expiry = expiry;
         this.path = path;
+
+        long _expires = 0;
+
+        if (expiry > 0) {
+            final long current = System.currentTimeMillis();
+
+            _expires = current + 1000 * expiry;
+        }
+
+        expires = _expires;
 
         if (remoteAddress == null) {
             throw new IllegalArgumentException("remote address was null");
@@ -119,6 +130,9 @@ class LoginCookieContent implements Serializable {
             return false;
         }
         final LoginCookieContent other = (LoginCookieContent) obj;
+        if (getExpires() != other.getExpires()) {
+            return false;
+        }
         if (remoteAddress == null) {
             if (other.remoteAddress != null) {
                 return false;
@@ -129,18 +143,22 @@ class LoginCookieContent implements Serializable {
         return true;
     }
 
+    public long getExpires() {
+        return expires;
+    }
+
     public String getRemoteAddress() {
         return remoteAddress;
     }
 
     /**
-     * 
      * @see Object#hashCode()
      */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (int) (getExpires() ^ getExpires() >>> 32);
         result = prime * result
                 + (remoteAddress == null ? 0 : remoteAddress.hashCode());
         return result;

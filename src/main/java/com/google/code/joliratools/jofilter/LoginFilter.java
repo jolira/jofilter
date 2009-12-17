@@ -107,6 +107,16 @@ public class LoginFilter implements Filter {
             return false;
         }
 
+        final long expires = content.getExpires();
+
+        if (expires > 0) {
+            final long current = System.currentTimeMillis();
+
+            if (current > expires) {
+                return false;
+            }
+        }
+
         final String actualRemoteAddress = content.getRemoteAddress();
         final String expectedRemoteAddress = req.getRemoteAddr();
 
