@@ -43,6 +43,7 @@ class Base64Coder {
 
     // Mapping table from 6-bit nibbles to Base64 characters.
     private static char[] map1 = new char[64];
+
     static {
         int i = 0;
         for (char c = 'A'; c <= 'Z'; c++) {
@@ -79,7 +80,7 @@ class Base64Coder {
      * @throws IllegalArgumentException
      *             if the input is not valid Base64 encoded data.
      */
-    public static byte[] decode(final char[] in) {
+    private static byte[] decode(final char[] in) {
         int iLen = in.length;
         if (iLen % 4 != 0) {
             throw new IllegalArgumentException(
@@ -132,21 +133,8 @@ class Base64Coder {
      * @throws IllegalArgumentException
      *             if the input is not valid Base64 encoded data.
      */
-    public static byte[] decode(final String s) {
+    static byte[] decode(final String s) {
         return decode(s.toCharArray());
-    }
-
-    /**
-     * Decodes a string from Base64 format.
-     * 
-     * @param s
-     *            a Base64 String to be decoded.
-     * @return A String containing the decoded data.
-     * @throws IllegalArgumentException
-     *             if the input is not valid Base64 encoded data.
-     */
-    public static String decodeString(final String s) {
-        return new String(decode(s));
     }
 
     /**
@@ -157,7 +145,7 @@ class Base64Coder {
      *            an array containing the data bytes to be encoded.
      * @return A character array with the Base64 encoded data.
      */
-    public static char[] encode(final byte[] in) {
+    static char[] encode(final byte[] in) {
         return encode(in, in.length);
     }
 
@@ -171,7 +159,7 @@ class Base64Coder {
      *            number of bytes to process in <code>in</code>.
      * @return A character array with the Base64 encoded data.
      */
-    public static char[] encode(final byte[] in, final int iLen) {
+    private static char[] encode(final byte[] in, final int iLen) {
         final int oDataLen = (iLen * 4 + 2) / 3; // output length without
         // padding
         final int oLen = (iLen + 2) / 3 * 4; // output length including padding
@@ -194,18 +182,6 @@ class Base64Coder {
             op++;
         }
         return out;
-    }
-
-    /**
-     * Encodes a string into Base64 format. No blanks or line breaks are
-     * inserted.
-     * 
-     * @param s
-     *            a String to be encoded.
-     * @return A String with the Base64 encoded data.
-     */
-    public static String encodeString(final String s) {
-        return new String(encode(s.getBytes()));
     }
 
     private Base64Coder() {

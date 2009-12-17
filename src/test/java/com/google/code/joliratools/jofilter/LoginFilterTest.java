@@ -630,7 +630,7 @@ public class LoginFilterTest {
 
     private static String urlEncode(final String value) {
         try {
-            return encode(TEST_URL, "UTF-8");
+            return encode(value, "UTF-8");
         } catch (final UnsupportedEncodingException e) {
             throw new Error(e);
         }
