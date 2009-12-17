@@ -18,6 +18,21 @@
       <param-name>password</param-name>
       <param-value>karen</param-value>
     </init-param>
+    <init-param>
+      <description>Domain to be used</description>
+      <param-name>domain</param-name>
+      <param-value>.jolira.com</param-value>
+    </init-param>
+    <init-param>
+      <description>Time for cookie to expire (in seconds)</description>
+      <param-name>expiry</param-name>
+      <param-value>900</param-value>
+    </init-param>
+    <init-param>
+      <description>Path to use for Cookie</description>
+      <param-name>path</param-name>
+      <param-value>/</param-value>
+    </init-param>
   </filter>
   <filter-mapping>
     <filter-name>LoginFilter</filter-name>

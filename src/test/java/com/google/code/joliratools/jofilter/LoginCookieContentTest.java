@@ -27,12 +27,12 @@ public class LoginCookieContentTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidKey() {
-        new LoginCookieContent("myaddr", null);
+        new LoginCookieContent("myaddr", null, null, 0, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidRemoteAddress() {
-        new LoginCookieContent(null, null);
+        new LoginCookieContent(null, null, null, 0, null);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class LoginCookieContentTest {
             ClassNotFoundException {
         final Key key = readKey();
         final LoginCookieContent content1 = new LoginCookieContent("myaddr",
-                key);
+                key, null, 0, null);
         final Cookie cookie = content1.toCookie();
         final LoginCookieContent content2 = LoginCookieContent.valueOf(cookie,
                 key);

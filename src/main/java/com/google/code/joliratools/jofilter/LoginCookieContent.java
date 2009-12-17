@@ -81,9 +81,17 @@ class LoginCookieContent implements Serializable {
     }
 
     private final String remoteAddress;
-    private final Key key;
+    private transient final Key key;
+    private transient final String domain;
+    private transient final int expiry;
+    private transient final String path;
 
-    LoginCookieContent(final String remoteAddress, final Key key) {
+    LoginCookieContent(final String remoteAddress, final Key key,
+            final String domain, final int expiry, final String path) {
+        this.domain = domain;
+        this.expiry = expiry;
+        this.path = path;
+
         if (remoteAddress == null) {
             throw new IllegalArgumentException("remote address was null");
         }
@@ -97,7 +105,7 @@ class LoginCookieContent implements Serializable {
     }
 
     /**
-     * @see Object#equals(java.lang.Object)
+     * @see Object#equals(Object)
      */
     @Override
     public boolean equals(final Object obj) {
@@ -111,13 +119,6 @@ class LoginCookieContent implements Serializable {
             return false;
         }
         final LoginCookieContent other = (LoginCookieContent) obj;
-        if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
-        }
         if (remoteAddress == null) {
             if (other.remoteAddress != null) {
                 return false;
@@ -133,13 +134,13 @@ class LoginCookieContent implements Serializable {
     }
 
     /**
+     * 
      * @see Object#hashCode()
      */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (key == null ? 0 : key.hashCode());
         result = prime * result
                 + (remoteAddress == null ? 0 : remoteAddress.hashCode());
         return result;
@@ -161,6 +162,18 @@ class LoginCookieContent implements Serializable {
         }
 
         final Cookie cookie = new Cookie(ACCESS_COOKIE_NAME, val);
+
+        if (domain != null && !domain.isEmpty()) {
+            cookie.setDomain(domain);
+        }
+
+        if (expiry > 0) {
+            cookie.setMaxAge(expiry);
+        }
+
+        if (path != null && !path.isEmpty()) {
+            cookie.setPath(path);
+        }
 
         return cookie;
     }

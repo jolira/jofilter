@@ -1,6 +1,5 @@
 package com.google.code.joliratools.jofilter;
 
-import static java.net.URLEncoder.encode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -606,8 +605,8 @@ public class LoginFilterTest {
             + LoginFilter.USERNAME + "\"><br>"
             + "Password: <input type=\"password\" name=\""
             + LoginFilter.PASSWORD + "\"><br>"
-            + "<input type=\"hidden\" name=\"url\" " + "value=\""
-            + urlEncode(TEST_URL) + "\">"
+            + "<input type=\"hidden\" name=\"url\" " + "value=\"" + TEST_URL
+            + "\">"
             + "<input type=\"submit\" value=\"Log In\"><br></input></form>"
             + "</body></html>";
 
@@ -631,14 +630,6 @@ public class LoginFilterTest {
             oout.writeObject(key);
         } finally {
             oout.close();
-        }
-    }
-
-    private static String urlEncode(final String value) {
-        try {
-            return encode(value, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            throw new Error(e);
         }
     }
 
@@ -771,7 +762,7 @@ public class LoginFilterTest {
         final Filter filter = new LoginFilter();
         final Key key = LoginCookieContentTest.readKey();
         final LoginCookieContent content = new LoginCookieContent(
-                REMOTE_ADDRESS, key);
+                REMOTE_ADDRESS, key, null, 0, null);
         final Cookie cookie = content.toCookie();
         final StringBuilder out = new StringBuilder();
 
@@ -811,7 +802,7 @@ public class LoginFilterTest {
         final Filter filter = new LoginFilter();
         final Key key = LoginCookieContentTest.readKey();
         final LoginCookieContent content = new LoginCookieContent(
-                REMOTE_ADDRESS, key);
+                REMOTE_ADDRESS, key, null, 0, null);
         final Cookie cookie = content.toCookie();
         final StringBuilder out = new StringBuilder();
 

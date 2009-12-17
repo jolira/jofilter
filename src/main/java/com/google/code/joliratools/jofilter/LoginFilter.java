@@ -30,6 +30,9 @@ public class LoginFilter implements Filter {
     private Key key;
     private String username;
     private String password;
+    private String domain;
+    private String path;
+    private int expiry = 0;
 
     static final String LOGIN_SERVLET = "___jo__security__check___";
     static final String USERNAME = "username";
@@ -46,7 +49,7 @@ public class LoginFilter implements Filter {
 
         final String remoteAddr = req.getRemoteAddr();
         final LoginCookieContent content = new LoginCookieContent(remoteAddr,
-                key);
+                key, domain, expiry, path);
         final Cookie cookie = content.toCookie();
 
         resp.addCookie(cookie);
@@ -137,6 +140,15 @@ public class LoginFilter implements Filter {
 
         if (password == null) {
             throw new IllegalArgumentException("please specify a " + PASSWORD);
+        }
+
+        domain = config.getInitParameter("domain");
+        path = config.getInitParameter("path");
+
+        final String _expiry = config.getInitParameter("expiry");
+
+        if (_expiry != null && !_expiry.isEmpty()) {
+            expiry = Integer.parseInt(_expiry);
         }
     }
 
