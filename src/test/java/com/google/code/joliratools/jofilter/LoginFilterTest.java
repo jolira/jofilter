@@ -1,6 +1,8 @@
 package com.google.code.joliratools.jofilter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
@@ -49,12 +51,12 @@ public class LoginFilterTest {
 
         @Override
         public String getInitParameter(final String name) {
-            if ("username".equals(name)) {
-                return "jolira";
+            if (LoginFilter.USERNAME.equals(name)) {
+                return ACTUAL_USERNAME;
             }
 
-            if ("password".equals(name)) {
-                return "karen";
+            if (LoginFilter.PASSWORD.equals(name)) {
+                return ACTUAL_PASSWORD;
             }
 
             return null;
@@ -189,12 +191,6 @@ public class LoginFilterTest {
         }
 
         @Override
-        public String getParameter(final String name) {
-            fail();
-            return null;
-        }
-
-        @Override
         public Map<?, ?> getParameterMap() {
             fail();
             return null;
@@ -314,6 +310,12 @@ public class LoginFilterTest {
         public int getServerPort() {
             fail();
             return 0;
+        }
+
+        @Override
+        public String getServletPath() {
+            fail();
+            return "/xxx/xxx";
         }
 
         @Override
@@ -525,13 +527,11 @@ public class LoginFilterTest {
         public void sendError(final int sc, final String msg)
                 throws IOException {
             fail();
-
         }
 
         @Override
         public void sendRedirect(final String location) throws IOException {
             fail();
-
         }
 
         @Override
@@ -595,17 +595,32 @@ public class LoginFilterTest {
         }
     }
 
+    private static final String ACTUAL_PASSWORD = "karen";
+
+    private static final String ACTUAL_USERNAME = "jolira";
+
     private static final String TEST_URL = "http://jolira.com/myinfo/test?a=b";
 
-    private static final String LOGIN_HTML = "<html><head><title>Please Log "
-            + "in!</title></head><body><form method=\"POST\" " + "action=\""
-            + LoginFilter.LOGIN_SERVLET
-            + "\">Username: <input type=\"text\" name=\""
-            + LoginFilter.USERNAME + "\"><br>"
-            + "Password: <input type=\"password\" name=\""
-            + LoginFilter.PASSWORD + "\"><br>"
-            + "<input type=\"hidden\" name=\"url\" " + "value=\"" + TEST_URL
-            + "\">"
+    private static final String LOGIN_HTML = "<html><head>"
+            + "<title>Please Log in!</title></head>" + "<body>"
+            + "<form method=\"POST\" action=\"#\">"
+            + "Username: <input type=\"text\" name=\"" + LoginFilter.USERNAME
+            + "\"><br>" + "Password: <input type=\"password\" name=\""
+            + LoginFilter.PASSWORD + "\"><br><input type=\"hidden\" name=\""
+            + LoginFilter.URL
+            + "\" value=\"http://jolira.com/myinfo/test?a=b\">"
+            + "<input type=\"submit\" value=\"Log In\"><br></input></form>"
+            + "</body></html>";
+
+    private static final String INVALID_LOGIN_HTML = "<html><head>"
+            + "<title>Please Log in!</title></head>" + "<body>"
+            + "<i>invalid username and/or password</i><br>"
+            + "<form method=\"POST\" action=\"#\">"
+            + "Username: <input type=\"text\" name=\"" + LoginFilter.USERNAME
+            + "\"><br>" + "Password: <input type=\"password\" name=\""
+            + LoginFilter.PASSWORD + "\"><br><input type=\"hidden\" name=\""
+            + LoginFilter.URL
+            + "\" value=\"http://jolira.com/myinfo/test?a=b\">"
             + "<input type=\"submit\" value=\"Log In\"><br></input></form>"
             + "</body></html>";
 
@@ -630,6 +645,59 @@ public class LoginFilterTest {
         } finally {
             oout.close();
         }
+    }
+
+    @Test
+    public void testInvalidLogin() throws ServletException, IOException {
+        final Filter filter = new LoginFilter();
+        final StringBuilder out = new StringBuilder();
+        final String[] locations = { null };
+
+        filter.init(new MockFilterConfig());
+        filter.doFilter(new MockHttpServletRequest() {
+            @Override
+            public Cookie[] getCookies() {
+                return null;
+            }
+
+            @Override
+            public String getParameter(final String name) {
+                if (LoginFilter.USERNAME.equals(name)) {
+                    return ACTUAL_USERNAME;
+                }
+
+                if (LoginFilter.PASSWORD.equals(name)) {
+                    return "incorrect";
+                }
+
+                if (LoginFilter.URL.equals(name)) {
+                    return TEST_URL;
+                }
+
+                return null;
+            }
+        }, new MockHttpServletResponse(out) {
+            @Override
+            public void sendRedirect(final String location) throws IOException {
+                locations[0] = location;
+            }
+
+            // nothing in this test
+        }, new FilterChain() {
+            @Override
+            public void doFilter(final ServletRequest request,
+                    final ServletResponse response) throws IOException,
+                    ServletException {
+                fail();
+            }
+        });
+        filter.destroy();
+
+        assertNull(locations[0]);
+
+        final String result = out.toString();
+
+        assertEquals(INVALID_LOGIN_HTML, result);
     }
 
     @Test
@@ -662,6 +730,59 @@ public class LoginFilterTest {
     }
 
     @Test
+    public void testLogin() throws ServletException, IOException {
+        final Filter filter = new LoginFilter();
+        final StringBuilder out = new StringBuilder();
+        final String[] locations = { null };
+
+        filter.init(new MockFilterConfig());
+        filter.doFilter(new MockHttpServletRequest() {
+            @Override
+            public Cookie[] getCookies() {
+                return null;
+            }
+
+            @Override
+            public String getParameter(final String name) {
+                if (LoginFilter.USERNAME.equals(name)) {
+                    return ACTUAL_USERNAME;
+                }
+
+                if (LoginFilter.PASSWORD.equals(name)) {
+                    return ACTUAL_PASSWORD;
+                }
+
+                if (LoginFilter.URL.equals(name)) {
+                    return TEST_URL;
+                }
+
+                return null;
+            }
+        }, new MockHttpServletResponse(out) {
+            @Override
+            public void sendRedirect(final String location) throws IOException {
+                locations[0] = location;
+            }
+
+            // nothing in this test
+        }, new FilterChain() {
+            @Override
+            public void doFilter(final ServletRequest request,
+                    final ServletResponse response) throws IOException,
+                    ServletException {
+                fail();
+            }
+        });
+        filter.destroy();
+
+        assertEquals(locations[0], TEST_URL);
+
+        final String result = out.toString();
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     public void testNoCookies() throws ServletException, IOException {
         final Filter filter = new LoginFilter();
         final StringBuilder out = new StringBuilder();
@@ -674,8 +795,8 @@ public class LoginFilterTest {
             }
 
             @Override
-            public String getServletPath() {
-                return "/xxx/xxx";
+            public String getParameter(final String name) {
+                return null;
             }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
@@ -701,7 +822,7 @@ public class LoginFilterTest {
         filter.init(new MockFilterConfig() {
             @Override
             public String getInitParameter(final String name) {
-                if (!"password".equals(name)) {
+                if (!LoginFilter.PASSWORD.equals(name)) {
                     return super.getInitParameter(name);
                 }
 
@@ -735,8 +856,8 @@ public class LoginFilterTest {
             }
 
             @Override
-            public String getServletPath() {
-                return "/xx/xxx";
+            public String getParameter(final String name) {
+                return null;
             }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
@@ -773,8 +894,8 @@ public class LoginFilterTest {
             }
 
             @Override
-            public String getServletPath() {
-                return "xx/xxx/xxx";
+            public String getParameter(final String name) {
+                return null;
             }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
@@ -813,8 +934,8 @@ public class LoginFilterTest {
             }
 
             @Override
-            public String getServletPath() {
-                return "xx/xxx/xxx";
+            public String getParameter(final String name) {
+                return null;
             }
         }, new MockHttpServletResponse(out) {
             // nothing in this test

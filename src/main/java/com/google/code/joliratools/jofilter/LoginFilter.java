@@ -26,9 +26,11 @@ public class LoginFilter implements Filter {
     private String path;
     private int expiry = 0;
 
+    @Deprecated
     static final String LOGIN_SERVLET = "___jo__security__check___";
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
+    static final String URL = "url";
 
     @Override
     public void destroy() {
@@ -43,23 +45,24 @@ public class LoginFilter implements Filter {
         String url = null;
 
         if (!hasValidCookie(_req)) {
-            final String servletPath = _req.getServletPath();
+            final String _username = req.getParameter(USERNAME);
+            final String _password = req.getParameter(PASSWORD);
 
-            if (servletPath == null
-                    || !servletPath.endsWith("/" + LOGIN_SERVLET)) {
+            if (_username == null || _username.isEmpty() || _password == null
+                    || _password.isEmpty()) {
                 final CharSequence requestURL = _req.getRequestURL();
 
                 respondWithLoginPage(requestURL, _resp, false);
                 return;
             }
 
-            url = req.getParameter("url");
+            url = req.getParameter(URL);
 
             if (url == null) {
                 throw new Error("unable to complete");
             }
 
-            if (!isValidUsernamePassword(_req)) {
+            if (!_username.equals(username) || !_password.equals(password)) {
                 respondWithLoginPage(url, _resp, true);
                 return;
             }
@@ -153,18 +156,6 @@ public class LoginFilter implements Filter {
         }
     }
 
-    private boolean isValidUsernamePassword(final HttpServletRequest req) {
-        final String _username = req.getParameter(USERNAME);
-
-        if (!username.equals(_username)) {
-            return false;
-        }
-
-        final String _password = req.getParameter(PASSWORD);
-
-        return password.equals(_password);
-    }
-
     private Key readKey(final InputStream in) throws IOException,
             ClassNotFoundException {
         final ObjectInputStream oin = new ObjectInputStream(in);
@@ -191,14 +182,16 @@ public class LoginFilter implements Filter {
             out.print("<i>invalid username and/or password</i><br>");
         }
 
-        out.print("<form method=\"POST\" action=\"");
-        out.print(LOGIN_SERVLET);
-        out.print("\">");
-        out.print("Username: <input type=\"text\" name=\"" + USERNAME
-                + "\"><br>");
-        out.print("Password: <input type=\"password\" name=\"" + PASSWORD
-                + "\"><br>");
-        out.print("<input type=\"hidden\" name=\"url\" value=\"");
+        out.print("<form method=\"POST\" action=\"#\">");
+        out.print("Username: <input type=\"text\" name=\"");
+        out.print(USERNAME);
+        out.print("\"><br>");
+        out.print("Password: <input type=\"password\" name=\"");
+        out.print(PASSWORD);
+        out.print("\"><br>");
+        out.print("<input type=\"hidden\" name=\"");
+        out.print(URL);
+        out.print("\" value=\"");
         out.print(requestURL.toString());
         out.print("\">");
         out.print("<input type=\"submit\" value=\"Log In\"><br>");
