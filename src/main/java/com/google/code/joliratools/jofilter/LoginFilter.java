@@ -25,9 +25,6 @@ public class LoginFilter implements Filter {
     private String domain;
     private String path;
     private int expiry = 0;
-
-    @Deprecated
-    static final String LOGIN_SERVLET = "___jo__security__check___";
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
     static final String URL = "url";
@@ -170,10 +167,15 @@ public class LoginFilter implements Filter {
     private void respondWithLoginPage(final CharSequence requestURL,
             final HttpServletResponse resp, final boolean previouslyFailed)
             throws IOException {
+        resp.setHeader("Pragma", "no-cache");
+        resp.setDateHeader("Expires", 0);
+
         final ServletOutputStream out = resp.getOutputStream();
 
         out.print("<html>");
         out.print("<head>");
+        out.print("<meta http-equiv=\"Pragma\" content=\"no-cache\">");
+        out.print("<meta http-equiv=\"CACHE-CONTROL\" content=\"no-cache\">");
         out.print("<title>Please Log in!</title>");
         out.print("</head>");
         out.print("<body>");

@@ -560,13 +560,13 @@ public class LoginFilterTest {
 
         @Override
         public void setDateHeader(final String name, final long date) {
-            fail();
+            // expected to be called
 
         }
 
         @Override
         public void setHeader(final String name, final String value) {
-            fail();
+            // expected to be called
 
         }
 
@@ -602,6 +602,8 @@ public class LoginFilterTest {
     private static final String TEST_URL = "http://jolira.com/myinfo/test?a=b";
 
     private static final String LOGIN_HTML = "<html><head>"
+            + "<meta http-equiv=\"Pragma\" content=\"no-cache\">"
+            + "<meta http-equiv=\"CACHE-CONTROL\" content=\"no-cache\">"
             + "<title>Please Log in!</title></head>" + "<body>"
             + "<form method=\"POST\" action=\"#\">"
             + "Username: <input type=\"text\" name=\"" + LoginFilter.USERNAME
@@ -613,6 +615,8 @@ public class LoginFilterTest {
             + "</body></html>";
 
     private static final String INVALID_LOGIN_HTML = "<html><head>"
+            + "<meta http-equiv=\"Pragma\" content=\"no-cache\">"
+            + "<meta http-equiv=\"CACHE-CONTROL\" content=\"no-cache\">"
             + "<title>Please Log in!</title></head>" + "<body>"
             + "<i>invalid username and/or password</i><br>"
             + "<form method=\"POST\" action=\"#\">"
