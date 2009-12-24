@@ -176,6 +176,8 @@ public class LoginFilter implements Filter {
         out.print("<head>");
         out.print("<meta http-equiv=\"Pragma\" content=\"no-cache\">");
         out.print("<meta http-equiv=\"CACHE-CONTROL\" content=\"no-cache\">");
+        out.print("<meta name = \"viewport\" "
+                + "content = \"width =device-width\">");
         out.print("<title>Please Log in!</title>");
         out.print("</head>");
         out.print("<body>");
@@ -187,11 +189,17 @@ public class LoginFilter implements Filter {
         out.print("<form method=\"POST\" action=\"#\">");
         out.print("Username: <input type=\"text\" name=\"");
         out.print(USERNAME);
+        out.print("\" id=\"");
+        out.print(USERNAME);
         out.print("\"><br>");
         out.print("Password: <input type=\"password\" name=\"");
         out.print(PASSWORD);
+        out.print("\" id=\"");
+        out.print(PASSWORD);
         out.print("\"><br>");
         out.print("<input type=\"hidden\" name=\"");
+        out.print(URL);
+        out.print("\" id=\"");
         out.print(URL);
         out.print("\" value=\"");
         out.print(requestURL.toString());
