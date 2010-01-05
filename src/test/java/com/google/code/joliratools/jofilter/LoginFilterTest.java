@@ -554,20 +554,17 @@ public class LoginFilterTest {
 
         @Override
         public void setContentType(final String type) {
-            fail();
-
+            // expected to be called
         }
 
         @Override
         public void setDateHeader(final String name, final long date) {
             // expected to be called
-
         }
 
         @Override
         public void setHeader(final String name, final String value) {
             // expected to be called
-
         }
 
         @Override

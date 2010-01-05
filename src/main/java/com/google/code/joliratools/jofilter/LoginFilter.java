@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.security.Key;
+import java.util.Date;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -19,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class LoginFilter implements Filter {
+    final static Logger LOG = Logger.getLogger(LoginFilter.class.getName());
+
     private Key key;
     private String username;
     private String password;
@@ -60,6 +64,10 @@ public class LoginFilter implements Filter {
             }
 
             if (!_username.equals(username) || !_password.equals(password)) {
+                final String remoteAddr = req.getRemoteAddr();
+
+                LOG.warning("login for user " + username + '@' + remoteAddr
+                        + " failed");
                 respondWithLoginPage(url, _resp, true);
                 return;
             }
@@ -89,6 +97,7 @@ public class LoginFilter implements Filter {
         final Cookie cookie = findAccessCookie(req);
 
         if (cookie == null) {
+            LOG.info("no cookie found");
             return false;
         }
 
@@ -96,6 +105,7 @@ public class LoginFilter implements Filter {
                 key);
 
         if (content == null) {
+            LOG.info("invalid cookie value");
             return false;
         }
 
@@ -105,6 +115,8 @@ public class LoginFilter implements Filter {
             final long current = System.currentTimeMillis();
 
             if (current > expires) {
+                final Date expired = new Date(expires);
+                LOG.info("cookie expired " + expired);
                 return false;
             }
         }
@@ -112,7 +124,14 @@ public class LoginFilter implements Filter {
         final String actualRemoteAddress = content.getRemoteAddress();
         final String expectedRemoteAddress = req.getRemoteAddr();
 
-        return expectedRemoteAddress.equals(actualRemoteAddress);
+        if (expectedRemoteAddress.equals(actualRemoteAddress)) {
+            return true;
+        }
+
+        LOG.warning("remote address did not match: expect "
+                + expectedRemoteAddress + "; got " + actualRemoteAddress);
+
+        return false;
     }
 
     @Override
@@ -137,6 +156,8 @@ public class LoginFilter implements Filter {
             throw new IllegalArgumentException("please specify a " + USERNAME);
         }
 
+        LOG.config("username: " + username);
+
         password = config.getInitParameter(PASSWORD);
 
         if (password == null) {
@@ -146,11 +167,16 @@ public class LoginFilter implements Filter {
         domain = config.getInitParameter("domain");
         path = config.getInitParameter("path");
 
+        LOG.config("domain: " + domain);
+        LOG.config("path: " + path);
+
         final String _expiry = config.getInitParameter("expiry");
 
         if (_expiry != null && !_expiry.isEmpty()) {
             expiry = Integer.parseInt(_expiry);
         }
+
+        LOG.config("expiry: " + expiry);
     }
 
     private Key readKey(final InputStream in) throws IOException,
@@ -167,6 +193,7 @@ public class LoginFilter implements Filter {
     private void respondWithLoginPage(final CharSequence requestURL,
             final HttpServletResponse resp, final boolean previouslyFailed)
             throws IOException {
+        resp.setContentType("text/html");
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
 
