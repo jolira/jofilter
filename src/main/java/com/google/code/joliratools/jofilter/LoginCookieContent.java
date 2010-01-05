@@ -1,5 +1,6 @@
 package com.google.code.joliratools.jofilter;
 
+import static java.util.logging.Level.FINE;
 import static javax.crypto.Cipher.DECRYPT_MODE;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 
@@ -14,6 +15,7 @@ import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -22,12 +24,21 @@ import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.Cookie;
 
 class LoginCookieContent implements Serializable {
+    final static Logger LOG = Logger.getLogger(LoginCookieContent.class
+            .getName());
+
     private static final String ALGORITHM = "Blowfish";
     private static final long serialVersionUID = 7579773293494069499L;
     static final String ACCESS_COOKIE_NAME = "AccessVerificationCookie";
 
     static Cookie findAccessCookie(final Cookie[] cookies) {
+        final boolean loggable = LOG.isLoggable(FINE);
+
         if (cookies == null) {
+            if (loggable) {
+                LOG.fine("no cookies found");
+            }
+
             return null;
         }
 
@@ -35,7 +46,15 @@ class LoginCookieContent implements Serializable {
             final String name = cookie.getName();
 
             if (ACCESS_COOKIE_NAME.equals(name)) {
+                if (loggable) {
+                    LOG.fine("found cookie" + name + ": " + cookie);
+                }
+
                 return cookie;
+            }
+
+            if (loggable) {
+                LOG.fine("skipping cookie " + name + ": " + cookie);
             }
         }
 

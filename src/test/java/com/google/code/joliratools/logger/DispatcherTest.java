@@ -18,7 +18,7 @@ public class DispatcherTest {
         final Logger logger = Logger.getLogger(cname);
         final Dispatcher dispatcher = new Dispatcher();
 
-        Queue q = dispatcher.addQueue();
+        Queue q = Dispatcher.createQueue();
 
         logger.addHandler(dispatcher);
 
@@ -41,5 +41,11 @@ public class DispatcherTest {
         q = null;
         System.gc();
         logger.severe("test");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testNoDispatcher() {
+        System.gc();
+        Dispatcher.createQueue();
     }
 }
