@@ -29,6 +29,8 @@ public class LoginFilter implements Filter {
     private String domain;
     private String path;
     private int expiry = 0;
+
+    private boolean verifyRemote;
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
     static final String URL = "url";
@@ -121,6 +123,10 @@ public class LoginFilter implements Filter {
             }
         }
 
+        if (!verifyRemote) {
+            return true;
+        }
+
         final String actualRemoteAddress = content.getRemoteAddress();
         final String expectedRemoteAddress = req.getRemoteAddr();
 
@@ -150,6 +156,8 @@ public class LoginFilter implements Filter {
             throw new Error(e);
         }
 
+        LOG.config("keyFile: " + keyFile);
+
         username = config.getInitParameter(USERNAME);
 
         if (username == null) {
@@ -177,6 +185,13 @@ public class LoginFilter implements Filter {
         }
 
         LOG.config("expiry: " + expiry);
+
+        final String _verifyRemote = config.getInitParameter("verifyRemote");
+
+        verifyRemote = _verifyRemote != null
+                && Boolean.parseBoolean(_verifyRemote);
+
+        LOG.config("verifyRemote: " + verifyRemote);
     }
 
     private Key readKey(final InputStream in) throws IOException,
