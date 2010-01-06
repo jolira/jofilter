@@ -8,7 +8,7 @@
   <artifactId>jofilter</artifactId>
   <packaging>jar</packaging>
   <name>Jolria Tomcat Access Filter</name>
-  <version>1.1.5</version>
+  <version>1.1.6-SNAPSHOT</version>
   <description>Ensures that the user has access to a particular web-application</description>
   <dependencies>
     <dependency>
@@ -93,10 +93,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.1.5</connection>
-    <developerConnection>scm:svn:https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.1.5</developerConnection>
-    <url>https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.1.5</url>
-  </scm>
 </project>
