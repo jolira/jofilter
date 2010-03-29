@@ -24,7 +24,7 @@ import java.util.logging.SimpleFormatter;
  * 
  */
 public final class Dispatcher extends Handler {
-    private static Reference<Dispatcher> singleton = null;
+    private static volatile Reference<Dispatcher> singleton = null;
     static final int DEFAULT_QSIZE = 1024;
 
     /**
