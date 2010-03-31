@@ -3,13 +3,15 @@
   <parent>
     <groupId>com.jolira</groupId>
     <artifactId>superpom</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.7</version>
   </parent>
   <artifactId>jofilter</artifactId>
   <packaging>jar</packaging>
   <name>Jolria Tomcat Access Filter</name>
   <version>1.1.7-SNAPSHOT</version>
-  <description>Ensures that the user has access to a particular web-application</description>
+  <description>A simple filter to prevent access to certain web-sites (such as beta version of mobile
+  applications) using a simple username-password combination. This filter is easy to use put provides
+  only minimal security.</description>
   <dependencies>
     <dependency>
       <groupId>geronimo-spec</groupId>
