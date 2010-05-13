@@ -20,6 +20,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * A very simple filter for preventing login.
+ * 
+ * @author jfk
+ * @date May 13, 2010 6:26:56 AM
+ * @since 1.0
+ */
 public class LoginFilter implements Filter {
     final static Logger LOG = Logger.getLogger(LoginFilter.class.getName());
 
@@ -41,8 +48,8 @@ public class LoginFilter implements Filter {
     }
 
     @Override
-    public void doFilter(final ServletRequest req, final ServletResponse resp,
-            final FilterChain chain) throws IOException, ServletException {
+    public void doFilter(final ServletRequest req, final ServletResponse resp, final FilterChain chain)
+            throws IOException, ServletException {
         final HttpServletRequest _req = (HttpServletRequest) req;
         final HttpServletResponse _resp = (HttpServletResponse) resp;
         String url = null;
@@ -51,8 +58,7 @@ public class LoginFilter implements Filter {
             final String _username = req.getParameter(USERNAME);
             final String _password = req.getParameter(PASSWORD);
 
-            if (_username == null || _username.isEmpty() || _password == null
-                    || _password.isEmpty()) {
+            if (_username == null || _username.isEmpty() || _password == null || _password.isEmpty()) {
                 final CharSequence requestURL = _req.getRequestURL();
 
                 respondWithLoginPage(requestURL, _resp, false);
@@ -68,16 +74,14 @@ public class LoginFilter implements Filter {
             if (!_username.equals(username) || !_password.equals(password)) {
                 final String remoteAddr = req.getRemoteAddr();
 
-                LOG.warning("login for user " + username + '@' + remoteAddr
-                        + " failed");
+                LOG.warning("login for user " + username + '@' + remoteAddr + " failed");
                 respondWithLoginPage(url, _resp, true);
                 return;
             }
         }
 
         final String remoteAddr = req.getRemoteAddr();
-        final LoginCookieContent content = new LoginCookieContent(remoteAddr,
-                key, domain, expiry, path);
+        final LoginCookieContent content = new LoginCookieContent(remoteAddr, key, domain, expiry, path);
         final Cookie cookie = content.toCookie();
 
         _resp.addCookie(cookie);
@@ -103,8 +107,7 @@ public class LoginFilter implements Filter {
             return false;
         }
 
-        final LoginCookieContent content = LoginCookieContent.valueOf(cookie,
-                key);
+        final LoginCookieContent content = LoginCookieContent.valueOf(cookie, key);
 
         if (content == null) {
             LOG.info("invalid cookie value");
@@ -134,8 +137,7 @@ public class LoginFilter implements Filter {
             return true;
         }
 
-        LOG.warning("remote address did not match: expect "
-                + expectedRemoteAddress + "; got " + actualRemoteAddress);
+        LOG.warning("remote address did not match: expect " + expectedRemoteAddress + "; got " + actualRemoteAddress);
 
         return false;
     }
@@ -146,8 +148,7 @@ public class LoginFilter implements Filter {
 
         try {
             key = readKey(keyFile == null || keyFile.isEmpty() ? LoginCookieContent.class
-                    .getResourceAsStream("filter.key")
-                    : new FileInputStream(keyFile));
+                    .getResourceAsStream("filter.key") : new FileInputStream(keyFile));
         } catch (final FileNotFoundException e) {
             throw new Error(e);
         } catch (final IOException e) {
@@ -188,14 +189,12 @@ public class LoginFilter implements Filter {
 
         final String _verifyRemote = config.getInitParameter("verifyRemote");
 
-        verifyRemote = _verifyRemote != null
-                && Boolean.parseBoolean(_verifyRemote);
+        verifyRemote = _verifyRemote != null && Boolean.parseBoolean(_verifyRemote);
 
         LOG.config("verifyRemote: " + verifyRemote);
     }
 
-    private Key readKey(final InputStream in) throws IOException,
-            ClassNotFoundException {
+    private Key readKey(final InputStream in) throws IOException, ClassNotFoundException {
         final ObjectInputStream oin = new ObjectInputStream(in);
 
         try {
@@ -205,9 +204,8 @@ public class LoginFilter implements Filter {
         }
     }
 
-    private void respondWithLoginPage(final CharSequence requestURL,
-            final HttpServletResponse resp, final boolean previouslyFailed)
-            throws IOException {
+    private void respondWithLoginPage(final CharSequence requestURL, final HttpServletResponse resp,
+            final boolean previouslyFailed) throws IOException {
         resp.setContentType("text/html");
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
@@ -218,8 +216,7 @@ public class LoginFilter implements Filter {
         out.print("<head>");
         out.print("<meta http-equiv=\"Pragma\" content=\"no-cache\">");
         out.print("<meta http-equiv=\"CACHE-CONTROL\" content=\"no-cache\">");
-        out.print("<meta name = \"viewport\" "
-                + "content = \"width =device-width\">");
+        out.print("<meta name = \"viewport\" " + "content = \"width =device-width\">");
         out.print("<title>Please Log in!</title>");
         out.print("</head>");
         out.print("<body>");
