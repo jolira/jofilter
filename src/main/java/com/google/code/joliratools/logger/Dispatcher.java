@@ -21,7 +21,6 @@ import java.util.logging.SimpleFormatter;
 
 /**
  * @author jfk
- * 
  */
 public final class Dispatcher extends Handler {
     private static volatile Reference<Dispatcher> singleton = null;
@@ -43,8 +42,7 @@ public final class Dispatcher extends Handler {
      * 
      * @see LogManager
      */
-    private static Filter getFilterProperty(final String name,
-            final Filter defaultValue) {
+    private static Filter getFilterProperty(final String name, final Filter defaultValue) {
         final String val = getProperty(name);
 
         try {
@@ -68,8 +66,7 @@ public final class Dispatcher extends Handler {
      * 
      * @see LogManager
      */
-    private static Formatter getFormatterProperty(final String name,
-            final Formatter defaultValue) {
+    private static Formatter getFormatterProperty(final String name, final Formatter defaultValue) {
         final String val = getProperty(name);
         try {
             if (val != null) {
@@ -111,8 +108,7 @@ public final class Dispatcher extends Handler {
      * 
      * @see LogManager
      */
-    private static Level getLevelProperty(final String name,
-            final Level defaultValue) {
+    private static Level getLevelProperty(final String name, final Level defaultValue) {
         final String val = getProperty(name);
 
         if (val == null) {
@@ -140,6 +136,10 @@ public final class Dispatcher extends Handler {
      *             if the dispatcher does not exist
      */
     public static Dispatcher getSingleton() {
+        if (singleton == null) {
+            throw new IllegalStateException("Dispatcher not registered in logging.properties");
+        }
+
         final Dispatcher dispatcher = singleton.get();
 
         if (dispatcher == null) {
@@ -166,8 +166,7 @@ public final class Dispatcher extends Handler {
         final String cname = getClass().getName();
         final Level level = getLevelProperty(cname + ".level", INFO);
         final Filter filter = getFilterProperty(cname + ".filter", null);
-        final Formatter formatter = getFormatterProperty(cname + ".formatter",
-                new SimpleFormatter());
+        final Formatter formatter = getFormatterProperty(cname + ".formatter", new SimpleFormatter());
         final String encoding = getProperty(cname + ".encoding");
 
         setLevel(level);
