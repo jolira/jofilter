@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.google.code.joliratools.logger;
 
@@ -25,17 +25,6 @@ import java.util.logging.SimpleFormatter;
 public final class Dispatcher extends Handler {
     private static volatile Reference<Dispatcher> singleton = null;
     static final int DEFAULT_QSIZE = 1024;
-
-    /**
-     * Create a new queue.
-     * 
-     * @return the newly added queue
-     */
-    public static Queue createQueue() {
-        final Dispatcher dispatcher = getSingleton();
-
-        return dispatcher.addQueue();
-    }
 
     /**
      * Copied from {@link LogManager}.
@@ -128,27 +117,6 @@ public final class Dispatcher extends Handler {
         return mgr.getProperty(name);
     }
 
-    /**
-     * Access the singleton.
-     * 
-     * @return the singleton
-     * @throws IllegalStateException
-     *             if the dispatcher does not exist
-     */
-    public static Dispatcher getSingleton() {
-        if (singleton == null) {
-            throw new IllegalStateException("Dispatcher not registered in logging.properties");
-        }
-
-        final Dispatcher dispatcher = singleton.get();
-
-        if (dispatcher == null) {
-            throw new IllegalStateException("no dispatcher available");
-        }
-
-        return dispatcher;
-    }
-
     private final List<Reference<QImpl>> queues = new LinkedList<Reference<QImpl>>();
     private final int qsize;
 
@@ -178,7 +146,15 @@ public final class Dispatcher extends Handler {
         singleton = new WeakReference<Dispatcher>(this);
     }
 
-    Queue addQueue() {
+    @Override
+    public void close() throws SecurityException {
+        // nothing
+    }
+
+    /**
+     * @return the newly created queue.
+     */
+    public Queue createQueue() {
         final QImpl q = new QImpl(qsize);
         final WeakReference<QImpl> reference = new WeakReference<QImpl>(q);
 
@@ -187,11 +163,6 @@ public final class Dispatcher extends Handler {
         }
 
         return q;
-    }
-
-    @Override
-    public void close() throws SecurityException {
-        // nothing
     }
 
     @Override
@@ -220,7 +191,6 @@ public final class Dispatcher extends Handler {
 
             return _queues.toArray(new QImpl[_size]);
         }
-
     }
 
     @Override

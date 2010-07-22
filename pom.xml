@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.jolira</groupId>
     <artifactId>superpom</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.9</version>
   </parent>
   <artifactId>jofilter</artifactId>
   <packaging>jar</packaging>

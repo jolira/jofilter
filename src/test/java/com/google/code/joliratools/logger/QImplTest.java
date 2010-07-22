@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.google.code.joliratools.logger;
 
@@ -10,9 +10,17 @@ import java.util.logging.LogRecord;
 
 import org.junit.Test;
 
+/**
+ * @author jfk
+ * @date Jul 22, 2010 2:20:06 PM
+ * @since 1.0
+ */
 public class QImplTest {
     private final static int QSIZE = 84;
 
+    /**
+     *
+     */
     @Test
     public void testQ() {
         final QImpl q = new QImpl(QSIZE);
@@ -48,6 +56,9 @@ public class QImplTest {
         }
     }
 
+    /**
+     *
+     */
     @Test
     public void testQRepeatedly() {
         final QImpl q = new QImpl(QSIZE);

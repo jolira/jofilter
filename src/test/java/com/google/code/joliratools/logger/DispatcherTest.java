@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.google.code.joliratools.logger;
 
@@ -11,14 +11,22 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
+/**
+ * @author jfk
+ * @date Jul 22, 2010 2:19:39 PM
+ * @since 1.0
+ */
 public class DispatcherTest {
+    /**
+     *
+     */
     @Test
     public void testDispatcher() {
         final String cname = DispatcherTest.class.getName();
         final Logger logger = Logger.getLogger(cname);
         final Dispatcher dispatcher = new Dispatcher();
 
-        Queue q = Dispatcher.createQueue();
+        Queue q = dispatcher.createQueue();
 
         logger.addHandler(dispatcher);
 
@@ -41,11 +49,5 @@ public class DispatcherTest {
         q = null;
         System.gc();
         logger.severe("test");
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testNoDispatcher() {
-        System.gc();
-        Dispatcher.createQueue();
     }
 }
