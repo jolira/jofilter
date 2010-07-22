@@ -23,7 +23,6 @@ import java.util.logging.SimpleFormatter;
  * @author jfk
  */
 public final class Dispatcher extends Handler {
-    private static volatile Reference<Dispatcher> singleton = null;
     static final int DEFAULT_QSIZE = 1024;
 
     /**
@@ -127,10 +126,6 @@ public final class Dispatcher extends Handler {
      *             if the dispatcher does not exist
      */
     public Dispatcher() {
-        if (singleton != null) {
-            throw new IllegalStateException("dispatcher already exists");
-        }
-
         final String cname = getClass().getName();
         final Level level = getLevelProperty(cname + ".level", INFO);
         final Filter filter = getFilterProperty(cname + ".filter", null);
@@ -143,7 +138,6 @@ public final class Dispatcher extends Handler {
         setEncoding(encoding);
 
         qsize = getIntProperty(cname + ".qsize", DEFAULT_QSIZE);
-        singleton = new WeakReference<Dispatcher>(this);
     }
 
     @Override
