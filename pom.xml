@@ -8,7 +8,7 @@
   <artifactId>jofilter</artifactId>
   <packaging>jar</packaging>
   <name>Jolria Tomcat Access Filter</name>
-  <version>1.1.9</version>
+  <version>1.1.10-SNAPSHOT</version>
   <description>A simple filter to prevent access to certain web-sites (such as beta version of mobile
   applications) using a simple username-password combination. This filter is easy to use put provides
   only minimal security.</description>
@@ -96,10 +96,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.1.9</connection>
-    <developerConnection>scm:svn:https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.1.9</developerConnection>
-    <url>https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.1.9</url>
-  </scm>
 </project>
