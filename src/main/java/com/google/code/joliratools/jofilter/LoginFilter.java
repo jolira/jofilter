@@ -51,16 +51,13 @@ public class LoginFilter implements Filter {
             throws IOException, ServletException {
         final HttpServletRequest _req = (HttpServletRequest) req;
         final HttpServletResponse _resp = (HttpServletResponse) resp;
-        final String url = null;
 
         if (!hasValidCookie(_req)) {
             final String _username = req.getParameter(USERNAME);
             final String _password = req.getParameter(PASSWORD);
 
             if (_username == null || _username.isEmpty() || _password == null || _password.isEmpty()) {
-                final CharSequence requestURL = _req.getRequestURL();
-
-                respondWithLoginPage(requestURL, _resp, false);
+                respondWithLoginPage(_resp, false);
                 return;
             }
 
@@ -68,7 +65,7 @@ public class LoginFilter implements Filter {
                 final String remoteAddr = req.getRemoteAddr();
 
                 LOG.warning("login for user " + username + '@' + remoteAddr + " failed");
-                respondWithLoginPage(url, _resp, true);
+                respondWithLoginPage(_resp, true);
                 return;
             }
         }
@@ -193,8 +190,8 @@ public class LoginFilter implements Filter {
         }
     }
 
-    private void respondWithLoginPage(final CharSequence requestURL, final HttpServletResponse resp,
-            final boolean previouslyFailed) throws IOException {
+    private void respondWithLoginPage(final HttpServletResponse resp, final boolean previouslyFailed)
+            throws IOException {
         resp.setContentType("text/html");
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
