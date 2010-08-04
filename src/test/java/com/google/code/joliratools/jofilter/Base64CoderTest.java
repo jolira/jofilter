@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.google.code.joliratools.jofilter;
 
@@ -9,13 +9,11 @@ import org.junit.Test;
 
 /**
  * @author jfk
- * 
  */
 public class Base64CoderTest {
 
     /**
-     * Test method for {@link Base64Coder#encode(byte[])} and
-     * {@link Base64Coder#decode(java.lang.String)}. .
+     * Test encoding & decoding
      */
     @Test
     public void testEncodeDecode() {

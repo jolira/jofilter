@@ -595,21 +595,15 @@ public class LoginFilterTest {
     }
 
     private static final String ACTUAL_PASSWORD = "karen";
-
     private static final String ACTUAL_USERNAME = "jolira";
-
     private static final String TEST_URL = "http://jolira.com/myinfo/test?a=b";
-
     private static final String LOGIN_HTML = "<html><head>" + "<meta http-equiv=\"Pragma\" content=\"no-cache\">"
             + "<meta http-equiv=\"CACHE-CONTROL\" content=\"no-cache\">"
             + "<meta name = \"viewport\" content = \"width =device-width\">" + "<title>Please Log in!</title></head>"
             + "<body>" + "<form method=\"POST\" action=\"#\">" + "Username: <input type=\"text\" name=\""
             + LoginFilter.USERNAME + "\" id=\"" + LoginFilter.USERNAME + "\"/><br>"
             + "Password: <input type=\"password\" name=\"" + LoginFilter.PASSWORD + "\" id=\"" + LoginFilter.PASSWORD
-            + "\"/><br><input type=\"hidden\" name=\"" + LoginFilter.URL + "\" id=\"" + LoginFilter.URL
-            + "\" value=\"http://jolira.com/myinfo/test?a=b\"/>"
-            + "<input type=\"submit\" value=\"Log In\"/><br></form>" + "</body></html>";
-
+            + "\"/><br><input type=\"submit\" value=\"Log In\"/><br></form>" + "</body></html>";
     private static final String INVALID_LOGIN_HTML = "<html><head>"
             + "<meta http-equiv=\"Pragma\" content=\"no-cache\">"
             + "<meta http-equiv=\"CACHE-CONTROL\" content=\"no-cache\">"
@@ -617,10 +611,7 @@ public class LoginFilterTest {
             + "<body>" + "<i>invalid username and/or password</i><br>" + "<form method=\"POST\" action=\"#\">"
             + "Username: <input type=\"text\" name=\"" + LoginFilter.USERNAME + "\" id=\"" + LoginFilter.USERNAME
             + "\"/><br>" + "Password: <input type=\"password\" name=\"" + LoginFilter.PASSWORD + "\" id=\""
-            + LoginFilter.PASSWORD + "\"/><br><input type=\"hidden\" name=\"" + LoginFilter.URL + "\" id=\""
-            + LoginFilter.URL + "\" value=\"http://jolira.com/myinfo/test?a=b\"/>"
-            + "<input type=\"submit\" value=\"Log In\"/><br></form>" + "</body></html>";
-
+            + LoginFilter.PASSWORD + "\"/><br><input type=\"submit\" value=\"Log In\"/><br></form></body></html>";
     private static final String REMOTE_ADDRESS = "theRemoteAddress";
 
     /**
@@ -673,10 +664,6 @@ public class LoginFilterTest {
 
                 if (LoginFilter.PASSWORD.equals(name)) {
                     return "incorrect";
-                }
-
-                if (LoginFilter.URL.equals(name)) {
-                    return TEST_URL;
                 }
 
                 return null;
@@ -742,7 +729,6 @@ public class LoginFilterTest {
     public void testLogin() throws ServletException, IOException {
         final Filter filter = new LoginFilter();
         final StringBuilder out = new StringBuilder();
-        final String[] locations = { null };
 
         filter.init(new MockFilterConfig());
         filter.doFilter(new MockHttpServletRequest() {
@@ -761,29 +747,18 @@ public class LoginFilterTest {
                     return ACTUAL_PASSWORD;
                 }
 
-                if (LoginFilter.URL.equals(name)) {
-                    return TEST_URL;
-                }
-
                 return null;
             }
         }, new MockHttpServletResponse(out) {
-            @Override
-            public void sendRedirect(final String location) throws IOException {
-                locations[0] = location;
-            }
-
-            // nothing in this test
+            // Nothing
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
                     ServletException {
-                fail();
+                // login succeeded
             }
         });
         filter.destroy();
-
-        assertEquals(locations[0], TEST_URL);
 
         final String result = out.toString();
 

@@ -40,7 +40,6 @@ public class LoginFilter implements Filter {
     private boolean verifyRemote;
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
-    static final String URL = "url";
 
     @Override
     public void destroy() {
@@ -52,7 +51,7 @@ public class LoginFilter implements Filter {
             throws IOException, ServletException {
         final HttpServletRequest _req = (HttpServletRequest) req;
         final HttpServletResponse _resp = (HttpServletResponse) resp;
-        String url = null;
+        final String url = null;
 
         if (!hasValidCookie(_req)) {
             final String _username = req.getParameter(USERNAME);
@@ -63,12 +62,6 @@ public class LoginFilter implements Filter {
 
                 respondWithLoginPage(requestURL, _resp, false);
                 return;
-            }
-
-            url = req.getParameter(URL);
-
-            if (url == null) {
-                throw new Error("unable to complete");
             }
 
             if (!_username.equals(username) || !_password.equals(password)) {
@@ -86,11 +79,7 @@ public class LoginFilter implements Filter {
 
         _resp.addCookie(cookie);
 
-        if (url != null) {
-            _resp.sendRedirect(url);
-        } else {
-            chain.doFilter(req, resp);
-        }
+        chain.doFilter(req, resp);
     }
 
     private Cookie findAccessCookie(final HttpServletRequest req) {
@@ -236,13 +225,6 @@ public class LoginFilter implements Filter {
         out.print("\" id=\"");
         out.print(PASSWORD);
         out.print("\"/><br>");
-        out.print("<input type=\"hidden\" name=\"");
-        out.print(URL);
-        out.print("\" id=\"");
-        out.print(URL);
-        out.print("\" value=\"");
-        out.print(requestURL.toString());
-        out.print("\"/>");
         out.print("<input type=\"submit\" value=\"Log In\"/><br>");
         out.print("</form>");
         out.print("</body>");
