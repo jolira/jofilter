@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.jolira</groupId>
@@ -11,12 +12,14 @@
   <version>1.2.0-SNAPSHOT</version>
   <description>A simple filter to prevent access to certain web-sites (such as beta version of mobile
   applications) using a simple username-password combination. This filter is easy to use put provides
-  only minimal security.</description>
+  only minimal security. This mechanism is meant to be a very light-weight security mechanism for,
+  for instance, mobile application, to keep the public out while doing development.
+  </description>
   <dependencies>
     <dependency>
-      <groupId>geronimo-spec</groupId>
-      <artifactId>geronimo-spec-servlet</artifactId>
-      <version>2.4-rc4</version>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -75,11 +78,9 @@
         </configuration>
       </plugin>
       <!--
-        <plugin> <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId> <version>2.2</version>
-        <configuration> <archive> <manifest>
-        <mainClass>com.wm.mobile.web.Launcher</mainClass> </manifest>
-        </archive> </configuration> </plugin>
+        <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-jar-plugin</artifactId>
+        <version>2.2</version> <configuration> <archive> <manifest> <mainClass>com.wm.mobile.web.Launcher</mainClass>
+        </manifest> </archive> </configuration> </plugin>
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
