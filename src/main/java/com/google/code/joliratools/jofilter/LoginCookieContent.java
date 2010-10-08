@@ -24,8 +24,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.Cookie;
 
 class LoginCookieContent implements Serializable {
-    final static Logger LOG = Logger.getLogger(LoginCookieContent.class
-            .getName());
+    final static Logger LOG = Logger.getLogger(LoginCookieContent.class.getName());
 
     private static final String ALGORITHM = "Blowfish";
     private static final long serialVersionUID = 7579773293494069499L;
@@ -61,10 +60,8 @@ class LoginCookieContent implements Serializable {
         return null;
     }
 
-    private static LoginCookieContent read(final String value, final Key key)
-            throws IOException, ClassNotFoundException,
-            NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException {
+    private static LoginCookieContent read(final String value, final Key key) throws IOException,
+            ClassNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
         final Cipher chipher = Cipher.getInstance(ALGORITHM);
 
         chipher.init(DECRYPT_MODE, key);
@@ -106,8 +103,8 @@ class LoginCookieContent implements Serializable {
     private transient final int expiry;
     private transient final String path;
 
-    LoginCookieContent(final String remoteAddress, final Key key,
-            final String domain, final int expiry, final String path) {
+    LoginCookieContent(final String remoteAddress, final Key key, final String domain, final int expiry,
+            final String path) {
         this.domain = domain;
         this.expiry = expiry;
         this.path = path;
@@ -178,8 +175,7 @@ class LoginCookieContent implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (int) (getExpires() ^ getExpires() >>> 32);
-        result = prime * result
-                + (remoteAddress == null ? 0 : remoteAddress.hashCode());
+        result = prime * result + (remoteAddress == null ? 0 : remoteAddress.hashCode());
         return result;
     }
 
@@ -208,15 +204,12 @@ class LoginCookieContent implements Serializable {
             cookie.setMaxAge(expiry);
         }
 
-        if (path != null && !path.isEmpty()) {
-            cookie.setPath(path);
-        }
+        cookie.setPath(path != null && !path.isEmpty() ? path : "/");
 
         return cookie;
     }
 
-    private String write() throws IOException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeyException {
+    private String write() throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
         final Cipher cipher = Cipher.getInstance(ALGORITHM);
 
         cipher.init(ENCRYPT_MODE, key);
