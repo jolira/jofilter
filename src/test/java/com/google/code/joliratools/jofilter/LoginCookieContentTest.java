@@ -30,16 +30,18 @@ public class LoginCookieContentTest {
     }
 
     /**
-     * 
+     *
      */
+    @SuppressWarnings("unused")
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidKey() {
         new LoginCookieContent("myaddr", null, null, 0, null);
     }
 
     /**
-     * 
+     *
      */
+    @SuppressWarnings("unused")
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidRemoteAddress() {
         new LoginCookieContent(null, null, null, 0, null);
