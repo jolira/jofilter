@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.security.Key;
 import java.util.Date;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -41,6 +42,49 @@ public class LoginFilter implements Filter {
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
 
+    private static char[] convertInet4Address(final String addr) {
+        if (addr == null) {
+            return null;
+        }
+
+        final StringTokenizer izer = new StringTokenizer(addr, ".");
+        final int count = izer.countTokens();
+
+        if (count != 4) {
+            return null;
+        }
+
+        final char[] _addr = new char[4];
+        int idx = 0;
+
+        while (izer.hasMoreTokens()) {
+            final String token = izer.nextToken();
+            final int _token = Integer.parseInt(token);
+
+            _addr[idx++] = (char) _token;
+        }
+
+        return _addr;
+    }
+
+    private static boolean isInternalAddress(final String addr) {
+        final char[] _addr = convertInet4Address(addr);
+
+        if (_addr == null) {
+            return false;
+        }
+
+        if (_addr[0] == 192 && _addr[1] == 168) {
+            return true;
+        }
+
+        if (_addr[0] == 172 && _addr[1] >= 16 && _addr[1] <= 31) {
+            return true;
+        }
+
+        return _addr[0] == 10;
+    }
+
     @Override
     public void destroy() {
         // nothing yet
@@ -51,30 +95,11 @@ public class LoginFilter implements Filter {
             throws IOException, ServletException {
         final HttpServletRequest _req = (HttpServletRequest) req;
         final HttpServletResponse _resp = (HttpServletResponse) resp;
-
-        if (!hasValidCookie(_req)) {
-            final String _username = req.getParameter(USERNAME);
-            final String _password = req.getParameter(PASSWORD);
-
-            if (_username == null || _username.isEmpty() || _password == null || _password.isEmpty()) {
-                respondWithLoginPage(_resp, false);
-                return;
-            }
-
-            if (!_username.equals(username) || !_password.equals(password)) {
-                final String remoteAddr = req.getRemoteAddr();
-
-                LOG.warning("login for user " + username + '@' + remoteAddr + " failed");
-                respondWithLoginPage(_resp, true);
-                return;
-            }
-        }
-
         final String remoteAddr = req.getRemoteAddr();
-        final LoginCookieContent content = new LoginCookieContent(remoteAddr, key, domain, expiry, path);
-        final Cookie cookie = content.toCookie();
 
-        _resp.addCookie(cookie);
+        if (!validateAccess(_req, _resp, remoteAddr)) {
+            return;
+        }
 
         chain.doFilter(req, resp);
     }
@@ -226,5 +251,34 @@ public class LoginFilter implements Filter {
         out.print("</form>");
         out.print("</body>");
         out.print("</html>");
+    }
+
+    private boolean validateAccess(final HttpServletRequest req, final HttpServletResponse resp, final String remoteAddr) throws IOException {
+        if (isInternalAddress(remoteAddr)) {
+            return true;
+        }
+
+        if (!hasValidCookie(req)) {
+            final String _username = req.getParameter(USERNAME);
+            final String _password = req.getParameter(PASSWORD);
+
+            if (_username == null || _username.isEmpty() || _password == null || _password.isEmpty()) {
+                respondWithLoginPage(resp, false);
+                return false;
+            }
+
+            if (!_username.equals(username) || !_password.equals(password)) {
+                LOG.warning("login for user " + username + '@' + remoteAddr + " failed");
+                respondWithLoginPage(resp, true);
+                return false;
+            }
+        }
+
+        final LoginCookieContent content = new LoginCookieContent(remoteAddr, key, domain, expiry, path);
+        final Cookie cookie = content.toCookie();
+
+        resp.addCookie(cookie);
+
+        return true;
     }
 }

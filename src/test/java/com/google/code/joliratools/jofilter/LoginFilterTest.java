@@ -7,23 +7,20 @@ import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.crypto.KeyGenerator;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -498,8 +495,10 @@ public class LoginFilterTest {
 
         @Override
         public PrintWriter getWriter() throws IOException {
-            fail();
-            return null;
+            final ServletOutputStream stream = getOutputStream();
+            final Writer writer = new OutputStreamWriter(stream);
+
+            return new PrintWriter(writer);
         }
 
         @Override
@@ -612,31 +611,169 @@ public class LoginFilterTest {
             + "Username: <input type=\"text\" name=\"" + LoginFilter.USERNAME + "\" id=\"" + LoginFilter.USERNAME
             + "\"/><br>" + "Password: <input type=\"password\" name=\"" + LoginFilter.PASSWORD + "\" id=\""
             + LoginFilter.PASSWORD + "\"/><br><input type=\"submit\" value=\"Log In\"/><br></form></body></html>";
-    private static final String REMOTE_ADDRESS = "theRemoteAddress";
+    private static final String REMOTE_ADDRESS = "72.14.213.121";
+
+    // /**
+    // * @param args
+    // * @throws NoSuchAlgorithmException
+    // * @throws IOException
+    // */
+    // public static void main(final String[] args) throws
+    // NoSuchAlgorithmException, IOException {
+    // if (args.length < 1) {
+    // throw new Error("Please specifiy a file name to store the key.");
+    // }
+    //
+    // final KeyGenerator keyGenerator = KeyGenerator.getInstance("Blowfish");
+    //
+    // keyGenerator.init(128);
+    //
+    // final Key key = keyGenerator.generateKey();
+    // final OutputStream out = new FileOutputStream(args[0]);
+    // final ObjectOutputStream oout = new ObjectOutputStream(out);
+    //
+    // try {
+    // oout.writeObject(key);
+    // } finally {
+    // oout.close();
+    // }
+    // }
 
     /**
-     * @param args
-     * @throws NoSuchAlgorithmException
+     * @throws ServletException
      * @throws IOException
      */
-    public static void main(final String[] args) throws NoSuchAlgorithmException, IOException {
-        if (args.length < 1) {
-            throw new Error("Please specifiy a file name to store the key.");
-        }
+    @Test
+    public void testInternalNetwork1() throws ServletException, IOException {
+        final Filter filter = new LoginFilter();
+        final StringBuilder out = new StringBuilder();
 
-        final KeyGenerator keyGenerator = KeyGenerator.getInstance("Blowfish");
+        filter.init(new MockFilterConfig());
+        filter.doFilter(new MockHttpServletRequest() {
+            @Override
+            public Cookie[] getCookies() {
+                fail();
+                return null;
+            }
 
-        keyGenerator.init(128);
+            @Override
+            public String getParameter(final String name) {
+                fail();
+                return null;
+            }
 
-        final Key key = keyGenerator.generateKey();
-        final OutputStream out = new FileOutputStream(args[0]);
-        final ObjectOutputStream oout = new ObjectOutputStream(out);
+            @Override
+            public String getRemoteAddr() {
+                return "172.28.1.7";
+            }
+        }, new MockHttpServletResponse(out) {
+            // Nothing
+        }, new FilterChain() {
+            @Override
+            public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException, ServletException {
+                final PrintWriter writer = response.getWriter();
 
-        try {
-            oout.writeObject(key);
-        } finally {
-            oout.close();
-        }
+                writer.print("SUCCESS");
+                writer.flush();
+            }
+        });
+        filter.destroy();
+
+        final String result = out.toString();
+
+        assertEquals("SUCCESS", result);
+    }
+
+    /**
+     * @throws ServletException
+     * @throws IOException
+     */
+    @Test
+    public void testInternalNetwork2() throws ServletException, IOException {
+        final Filter filter = new LoginFilter();
+        final StringBuilder out = new StringBuilder();
+
+        filter.init(new MockFilterConfig());
+        filter.doFilter(new MockHttpServletRequest() {
+            @Override
+            public Cookie[] getCookies() {
+                fail();
+                return null;
+            }
+
+            @Override
+            public String getParameter(final String name) {
+                fail();
+                return null;
+            }
+
+            @Override
+            public String getRemoteAddr() {
+                return "192.168.1.7";
+            }
+        }, new MockHttpServletResponse(out) {
+            // Nothing
+        }, new FilterChain() {
+            @Override
+            public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
+            ServletException {
+                final PrintWriter writer = response.getWriter();
+
+                writer.print("SUCCESS");
+                writer.flush();
+            }
+        });
+        filter.destroy();
+
+        final String result = out.toString();
+
+        assertEquals("SUCCESS", result);
+    }
+
+    /**
+     * @throws ServletException
+     * @throws IOException
+     */
+    @Test
+    public void testInternalNetwork3() throws ServletException, IOException {
+        final Filter filter = new LoginFilter();
+        final StringBuilder out = new StringBuilder();
+
+        filter.init(new MockFilterConfig());
+        filter.doFilter(new MockHttpServletRequest() {
+            @Override
+            public Cookie[] getCookies() {
+                fail();
+                return null;
+            }
+
+            @Override
+            public String getParameter(final String name) {
+                fail();
+                return null;
+            }
+
+            @Override
+            public String getRemoteAddr() {
+                return "10.1.1.1";
+            }
+        }, new MockHttpServletResponse(out) {
+            // Nothing
+        }, new FilterChain() {
+            @Override
+            public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
+            ServletException {
+                final PrintWriter writer = response.getWriter();
+
+                writer.print("SUCCESS");
+                writer.flush();
+            }
+        });
+        filter.destroy();
+
+        final String result = out.toString();
+
+        assertEquals("SUCCESS", result);
     }
 
     /**
@@ -668,6 +805,11 @@ public class LoginFilterTest {
 
                 return null;
             }
+
+            @Override
+            public String getRemoteAddr() {
+                return "172.32.1.7";
+            }
         }, new MockHttpServletResponse(out) {
             @Override
             public void sendRedirect(final String location) throws IOException {
@@ -678,7 +820,7 @@ public class LoginFilterTest {
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
-                    ServletException {
+            ServletException {
                 fail();
             }
         });
@@ -749,12 +891,17 @@ public class LoginFilterTest {
 
                 return null;
             }
+
+            @Override
+            public String getRemoteAddr() {
+                return "172.15.1.7";
+            }
         }, new MockHttpServletResponse(out) {
             // Nothing
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
-                    ServletException {
+            ServletException {
                 // login succeeded
             }
         });
@@ -785,12 +932,17 @@ public class LoginFilterTest {
             public String getParameter(final String name) {
                 return null;
             }
+
+            @Override
+            public String getRemoteAddr() {
+                return null;
+            }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
-                    ServletException {
+            ServletException {
                 fail();
             }
         });
@@ -860,7 +1012,7 @@ public class LoginFilterTest {
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
-                    ServletException {
+            ServletException {
                 fail();
             }
         });
@@ -895,12 +1047,17 @@ public class LoginFilterTest {
             public String getParameter(final String name) {
                 return null;
             }
+
+            @Override
+            public String getRemoteAddr() {
+                return "172.28.1";
+            }
         }, new MockHttpServletResponse(out) {
             // nothing in this test
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
-                    ServletException {
+            ServletException {
                 final ServletOutputStream _out = response.getOutputStream();
 
                 _out.print("success");
@@ -942,7 +1099,7 @@ public class LoginFilterTest {
         }, new FilterChain() {
             @Override
             public void doFilter(final ServletRequest request, final ServletResponse response) throws IOException,
-                    ServletException {
+            ServletException {
                 final ServletOutputStream _out = response.getOutputStream();
 
                 _out.print("success");
