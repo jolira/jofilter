@@ -8,7 +8,7 @@
   <artifactId>jofilter</artifactId>
   <packaging>jar</packaging>
   <name>Jolria Tomcat Access Filter</name>
-  <version>1.2.3</version>
+  <version>1.2.4-SNAPSHOT</version>
   <description>A simple filter to prevent access to certain web-sites (such as beta version of mobile
   applications) using a simple username-password combination. This filter is easy to use put provides
   only minimal security. This mechanism is meant to be a very light-weight security mechanism for,
