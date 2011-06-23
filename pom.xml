@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.jolira</groupId>
     <artifactId>superpom</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.4</version>
   </parent>
   <artifactId>jofilter</artifactId>
   <packaging>jar</packaging>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.8.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -100,8 +100,8 @@
   </build>
 
   <scm>
-    <connection>scm:svn:https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.2.0</connection>
-    <developerConnection>scm:svn:https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.2.0</developerConnection>
-    <url>https://jolira-tools.googlecode.com/svn/superpom/tags/jofilter-1.2.0</url>
+    <connection>scm:git:git@github.com:jolira/jofilter.git</connection>
+    <developerConnection>scm:git:git@github.com:jolira/jofilter.git</developerConnection>
+    <url>https://github.com/jolira/jofilter</url>
   </scm>
 </project>
